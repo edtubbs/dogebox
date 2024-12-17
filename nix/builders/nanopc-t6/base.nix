@@ -6,9 +6,59 @@
 }:
 
 {
-  nixpkgs.overlays = [
+  nixpkgs.overlays = lib.mkAfter [
+    (import ./arm-trusted-firmware/overlay.nix)
+    (import ./optee/overlay.nix)
+
     (final: super: {
       makeModulesClosure = x: super.makeModulesClosure (x // { allowMissing = true; });
+
+      optee-os-rockchip-rk3588 = final.buildOptee {
+        platform = "rockchip-rk3588";
+        version  = "4.6.0";
+        src = final.fetchFromGitHub {
+          owner = "OP-TEE";
+          repo  = "optee_os";
+          rev   = "4.6.0";
+          hash  = "sha256-4z706DNfZE+CAPOa362CNSFhAN1KaNyKcI9C7+MRccs=";
+        };
+        extraMakeFlags = [
+          "CFG_TEE_CORE_LOG_LEVEL=0"
+          "CFG_ATTESTATION_PTA=y"
+          "CFG_ATTESTATION_PTA_KEY_SIZE=1024"
+          "CFG_WITH_USER_TA=y"
+          "CFG_WITH_SOFTWARE_PRNG=n"
+        ];
+      };
+
+      optee-client = super.optee-client.overrideAttrs (old: {
+        version = "4.6.0";
+        src = final.fetchFromGitHub {
+          owner = "OP-TEE";
+          repo  = "optee_client";
+          rev   = "4.6.0";
+          hash  = "sha256-hHEIn0WU4XfqwZbOdg9kwSDxDcvK7Tvxtelamfc3IRM=";
+        };
+      });
+
+      armTrustedFirmwareRK3588 = super.armTrustedFirmwareRK3588.overrideAttrs (old: {
+        prePatch = ''
+          sed -i 's/#define FDT_BUFFER_SIZE 0x20000/#define FDT_BUFFER_SIZE 0x60000/g' \
+            plat/rockchip/common/params_setup.c
+        '';
+        makeFlags = old.makeFlags ++ [ "SPD=opteed" "LOG_LEVEL=40" "bl31" ];
+      });
+
+      ubootNanoPCT6 = super.buildUBoot {
+        defconfig           = "nanopc-t6-rk3588_defconfig";
+        extraMeta.platforms = [ "aarch64-linux" ];
+        extraMakeFlags = [
+          "BL31=${pkgs.armTrustedFirmwareRK3588}/bl31.elf"
+          "ROCKCHIP_TPL=${pkgs.rkbin.TPL_RK3588}"
+          "TEE=${final.optee-os-rockchip-rk3588}/tee.bin"
+        ];
+        filesToInstall = [ "u-boot.itb" "idbloader.img" ];
+      };
     })
   ];
 
@@ -47,6 +97,7 @@
           (old: {
             nativeBuildInputs = old.nativeBuildInputs ++ [ ubootTools ];
             prePatch = ''
+              patch -p1 < ${./rk3588-nanopi6-common.dtsi.patch}
               cp arch/arm64/boot/dts/rockchip/rk3588-nanopi6-rev01.dts arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
               sed -i "s/rk3588-nanopi6-rev0a.dtb/rk3588-nanopi6-rev0a.dtb\ rk3588-nanopc-t6.dtb/" arch/arm64/boot/dts/rockchip/Makefile
             '';
