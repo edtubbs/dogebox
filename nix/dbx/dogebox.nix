@@ -65,7 +65,7 @@ in\
         echo "Adding nixpkgs channel..."
         ${pkgs.nix}/bin/nix-channel --add https://nixos.org/channels/nixos-24.05 nixpkgs
         echo "Adding dogebox nix channel..."
-        ${pkgs.nix}/bin/nix-channel --add https://github.com/dogeorg/dogebox-nur-packages/archive/${dbxRelease}.tar.gz dogebox
+        ${pkgs.nix}/bin/nix-channel --add https://github.com/edtubbs/dogebox-nur-packages/archive/${dbxRelease}.tar.gz dogebox
         echo "Sleeping for 5 seconds..."
         sleep 5
         echo "Updating nix channels..."
