@@ -9,8 +9,8 @@
   outputs = { self, nixpkgs, nixos-generators,... } @ inputs: let
     # Both of these MUST be updated to successfully build a new
     # release, otherwise nix will silently cache things.
-    dbxRelease = "v0.3.2-beta.3";
-    nurPackagesHash = "4e3a0c35aef994e3ec5516ccbb7c202a0cb8fb27";
+    dbxRelease = "v0.3.2-beta.3-extended-key";
+    nurPackagesHash = "0d35f91c4f7d7b75606c88df86393257869f5707";
 
     developmentMode = builtins.getEnv "dev" == "1";
 
@@ -22,7 +22,7 @@
     localDogeboxdPath = if (builtins.hasAttr "dogeboxd" devConfig) then devConfig.dogeboxd else null;
     localDpanelPath = if (builtins.hasAttr "dpanel" devConfig) then devConfig.dpanel else null;
     dogeboxNurPackagesPath = if (builtins.hasAttr "nur" devConfig) then devConfig.nur else builtins.fetchGit {
-      url = "https://github.com/dogeorg/dogebox-nur-packages.git";
+      url = "https://github.com/edtubbs/dogebox-nur-packages.git";
       ref = "refs/tags/${dbxRelease}";
       rev = nurPackagesHash;
     };
