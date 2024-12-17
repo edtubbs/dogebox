@@ -56,15 +56,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1750213277,
-        "narHash": "sha256-8QuPSYp8ikGpKc2O/oD2IaFoSPoiwpnpXWsnbnBZ7lE=",
-        "owner": "dogebox-wg",
+        "lastModified": 1750785147,
+        "narHash": "sha256-4KnNLynIHCB2ko61W4N0OJd28bCrT+4lCVnoqc+JqqI=",
+        "owner": "edtubbs",
         "repo": "dogeboxd",
-        "rev": "57de5ed3aabb04156233dc104908cdab36740b3c",
+        "rev": "585ec083601182fc32507b2c17d52bdb4b0af9e8",
         "type": "github"
       },
       "original": {
-        "owner": "dogebox-wg",
+        "owner": "edtubbs",
+        "ref": "dogebox-v0.3.2-optee-yubikey",
         "repo": "dogeboxd",
         "type": "github"
       }
@@ -80,11 +81,11 @@
         "playwright": "playwright"
       },
       "locked": {
-        "lastModified": 1750226221,
-        "narHash": "sha256-jig5YYRg6iBur/LIb0SU3DNu6AUh3Hajk5JcCU2Uggg=",
+        "lastModified": 1750815019,
+        "narHash": "sha256-RSgAyR35eqfc3tFctzclwOHpoDactSddd0akBTcBsVA=",
         "owner": "dogebox-wg",
         "repo": "dpanel",
-        "rev": "52c7ab23dba8e2836cdba9edb7e01b2558fca130",
+        "rev": "6806a75394f5606826910a7024792f60359d23ca",
         "type": "github"
       },
       "original": {
@@ -216,11 +217,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1750151854,
-        "narHash": "sha256-3za+1J9FifMetO7E/kwgyW+dp+8pPBNlWKfcBovnn6M=",
+        "lastModified": 1750646418,
+        "narHash": "sha256-4UAN+W0Lp4xnUiHYXUXAPX18t+bn6c4Btry2RqM9JHY=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "ad5c70bcc5cc5178205161b7a7d61a6e80f6d244",
+        "rev": "1f426f65ac4e6bf808923eb6f8b8c2bfba3d18c5",
         "type": "github"
       },
       "original": {
@@ -257,11 +258,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1749636823,
-        "narHash": "sha256-WUaIlOlPLyPgz9be7fqWJA5iG6rHcGRtLERSCfUDne4=",
+        "lastModified": 1750779888,
+        "narHash": "sha256-wibppH3g/E2lxU43ZQHC5yA/7kIKLGxVEnsnVK1BtRg=",
         "owner": "cachix",
         "repo": "pre-commit-hooks.nix",
-        "rev": "623c56286de5a3193aa38891a6991b28f9bab056",
+        "rev": "16ec914f6fb6f599ce988427d9d94efddf25fe6d",
         "type": "github"
       },
       "original": {

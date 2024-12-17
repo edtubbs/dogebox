@@ -21,7 +21,7 @@
     };
 
     dogeboxd = {
-      url = "github:dogebox-wg/dogeboxd";
+      url = "github:edtubbs/dogeboxd/dogebox-v0.3.2-optee-yubikey";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
       inputs.dpanel-src.follows = "dpanel";
@@ -68,13 +68,20 @@
       getSetOptScript =
         builderType: isBaseBuilder:
         let
-          isReadOnly = (builderType == "iso" || builderType == "nanopc-t6");
-          mediaFile = if isReadOnly then "ro-media" else "rw-media";
+          # “Live installers” are ISO images only.
+          isReadOnly = (builderType == "iso");
         in
         ''
           mkdir -p /opt
           echo '${builderType}' > /opt/build-type
-          touch /opt/${mediaFile}
+
+          if [ -f /opt/dbx-installed ]; then
+            rm -f /opt/ro-media
+            touch /opt/rw-media
+          else
+            rm -f /opt/rw-media
+            touch /opt/ro-media
+          fi
         '';
 
       versionScript =
