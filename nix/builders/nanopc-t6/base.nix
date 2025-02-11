@@ -49,6 +49,12 @@
     })
     .overrideAttrs (old: {
       nativeBuildInputs = old.nativeBuildInputs ++ [ubootTools];
+      prePatch = ''
+        patch -p1 < ${./rk3588-nanopi6-common.dtsi.patch}
+        cp arch/arm64/boot/dts/rockchip/rk3588-nanopi6-rev01.dts arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
+        sed -i "s/rk3588-nanopi6-rev0a.dtb/rk3588-nanopi6-rev0a.dtb\ rk3588-nanopc-t6.dtb/" arch/arm64/boot/dts/rockchip/Makefile
+      '';
+      makeFlags = (old.makeFlags or []) ++ [ "KCFLAGS=-Wno-error" ];
     });
       linux_rk3588 = pkgs.callPackage linux_rk3588_pkg{};
     in
@@ -63,52 +69,6 @@
     { device = "/dev/disk/by-label/nixos";
       fsType = "ext4";
     };
-
-  environment.systemPackages = with pkgs; [
-    cloud-utils
-    parted
-    wpa_supplicant
-    screen
-  ];
-
-  #systemd.services.formatLargestDisk = {
-  #  description = "Formats the largest disk to ext4";
-  #  unitConfig = {
-  #    type = "oneshot";
-  #    after = [ "sysinit.target" ];
-  #  };##
-
-  #  script = ''
-  #    if [ ! -e /etc/largest-disk-formatted ]; then
-  #      largest_disk=$(lsblk -dno NAME,SIZE,MOUNTPOINT | awk '$3 == "" {print $1, $2}' | sort -rh -k2 | head -n1 | awk '{print $1}')
-
-  #      if [ -z "$largest_disk" ]; then
-  #        echo "No suitable data disk found."
-  #        exit 1
-  #      fi
-
-  #      echo "Largest unmounted disk found: $largest_disk"
-  #      echo "Formatting as ext4..."
-  #      mkfs.ext4 /dev/$largest_disk
-
-   #     cat <<EOF > /etc/nixos/opt-overlay.nix
-#{ ... }:
-
-#{
-#  fileSystems."/opt" = {
-#    device = "/dev/''${largest_disk}";
-#    fsType = "ext4";
-#  };
-#}
-#        EOF
-
- #       echo "/dev/$largest_disk" > /etc/largest-disk
- #       touch /etc/largest-disk-formatted
-  #    fi
-  #  '';
-
-   # wantedBy = [ "basic.target" "runOnceOnFirstBoot.service" ];
- # };
 
   systemd.services.resizerootfs = {
     description = "Expands root filesystem of boot deviceon first boot";
