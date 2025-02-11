@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:edtubbs/nixpkgs/add-optee";
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -9,8 +9,8 @@
   outputs = { self, nixpkgs, nixos-generators,... } @ inputs: let
     # Both of these MUST be updated to successfully build a new
     # release, otherwise nix will silently cache things.
-    dbxRelease = "v0.3.2-beta.3-extended-key";
-    nurPackagesHash = "0d35f91c4f7d7b75606c88df86393257869f5707";
+    dbxRelease = "v0.3.1-beta-extended-key-optee";
+    nurPackagesHash = "be05cfcb0536792d2f6fb878101a8cfa7a08506c";
 
     developmentMode = builtins.getEnv "dev" == "1";
 
