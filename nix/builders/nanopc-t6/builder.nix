@@ -122,13 +122,8 @@ in
           final.openssl
           final.util-linux
           final.gnutls
+          final.ubootTools
         ];
-        extraConfig = ''
-          CONFIG_OPTEE_LIB=y
-          CONFIG_OPTEE_TZDRAM_SIZE=0x02000000
-          CONFIG_SPL_FIT=y
-          CONFIG_SPL_LOAD_FIT_FULL=y
-        '';
         extraMakeFlags = [
           "BL31=${pkgs.armTrustedFirmwareRK3588}/bl31.elf"
           "ROCKCHIP_TPL=${pkgs.rkbin.TPL_RK3588}"
@@ -140,17 +135,20 @@ in
           ln -sf ${pkgs.armTrustedFirmwareRK3588}/bl31.elf bl31.elf
           ln -sf ${final.optee-os-rockchip-rk3588}/tee-raw.bin tee.bin
           substituteInPlace tools/binman/main.py \
-            --replace '#!/usr/bin/env python3' '#!${pkgs.python3}/bin/python3'
+            --replace-warn '#!/usr/bin/env python3' '#!${pkgs.python3}/bin/python3'
+        '';
+        postInstall = ''
+          mkimage -l u-boot.itb
         '';
         filesToInstall = [ "u-boot.itb" "idbloader.img" "dts/upstream/src/arm64/rockchip/rk3588-nanopc-t6.dtb" ];
       };
 
       libdogecoin-optee-ta-libs = final.stdenv.mkDerivation rec {
         pname = "libdogecoin-optee-ta-libs";
-        version = "0.1.4-dogebox-enclave-app";
+        version = "0.1.4-dogebox-enclave";
         src = final.fetchurl {
           url = "https://github.com/edtubbs/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-O9yrU8ZX57iDt+uwexOiAt89VF2zoFGs8//6ypHmSgs=";
+          hash = "sha256-U7Jk+/n9HmuhMM5kUuBou7YUIwNa+bOMUsoV2tIDT/Y=";
         };
 
         buildInputs = [
@@ -198,10 +196,10 @@ in
 
       libdogecoin-optee-host-libs = final.stdenv.mkDerivation rec {
         pname = "libdogecoin-optee-host-libs";
-        version = "0.1.4-dogebox-enclave-app";
+        version = "0.1.4-dogebox-enclave";
         src = final.fetchurl {
           url = "https://github.com/edtubbs/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-O9yrU8ZX57iDt+uwexOiAt89VF2zoFGs8//6ypHmSgs=";
+          hash = "sha256-U7Jk+/n9HmuhMM5kUuBou7YUIwNa+bOMUsoV2tIDT/Y=";
         };
 
         buildInputs = [
@@ -247,10 +245,10 @@ in
 
       libdogecoin-optee-host = final.stdenv.mkDerivation rec {
         pname = "libdogecoin-optee-host";
-        version = "0.1.4-dogebox-enclave-app";
+        version = "0.1.4-dogebox-enclave";
         src = final.fetchurl {
           url = "https://github.com/edtubbs/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-O9yrU8ZX57iDt+uwexOiAt89VF2zoFGs8//6ypHmSgs=";
+          hash = "sha256-U7Jk+/n9HmuhMM5kUuBou7YUIwNa+bOMUsoV2tIDT/Y=";
         };
         buildInputs = [
           final.autoconf
@@ -284,10 +282,10 @@ in
 
       libdogecoin-optee-ta = final.stdenv.mkDerivation rec {
         pname = "libdogecoin-optee-ta";
-        version = "0.1.4-dogebox-enclave-app";
+        version = "0.1.4-dogebox-enclave";
         src = final.fetchurl {
           url = "https://github.com/edtubbs/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-O9yrU8ZX57iDt+uwexOiAt89VF2zoFGs8//6ypHmSgs=";
+          hash = "sha256-U7Jk+/n9HmuhMM5kUuBou7YUIwNa+bOMUsoV2tIDT/Y=";
         };
         buildInputs = [
           final.autoconf
@@ -359,6 +357,7 @@ in
   environment.systemPackages = with pkgs; [
     cloud-utils
     parted
+    gptfdisk
     wpa_supplicant
     screen
     optee-os-rockchip-rk3588
