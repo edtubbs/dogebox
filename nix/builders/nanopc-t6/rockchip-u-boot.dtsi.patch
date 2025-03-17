@@ -1,3 +1,5 @@
+diff --git a/arch/arm/dts/rockchip-u-boot.dtsi b/arch/arm/dts/rockchip-u-boot.dtsi
+index c8c928c7e5..a2d27bb884 100644
 --- a/arch/arm/dts/rockchip-u-boot.dtsi
 +++ b/arch/arm/dts/rockchip-u-boot.dtsi
 @@ -99,19 +99,16 @@
@@ -25,12 +27,3 @@
  					};
  #ifdef CONFIG_SPL_FIT_SIGNATURE
  					hash {
-@@ -157,7 +154,7 @@
- 					description = "NAME.dtb";
- 					fdt = "fdt-SEQ";
- #ifdef CONFIG_ARM64
--					fit,firmware = "atf-1", "u-boot";
-+					fit,firmware = "atf-1", "u-boot", "op-tee";
- #else
- 					fit,firmware = "op-tee", "u-boot";
- #endif
