@@ -14,6 +14,10 @@
     pkgs.nix
     pkgs.git
     pkgs.libxkbcommon
+    pkgs.optee-os-rockchip-rk3588
+    pkgs.optee-client
+    pkgs.libdogecoin-optee-host
+    pkgs.libdogecoin-optee-ta
   ];
 
   users.motd = ''
@@ -88,4 +92,11 @@
       } ];
     }
   ];
+
+  services.tee-supplicant = {
+    enable = true;
+    trustedApplications = [
+      "${pkgs.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
+    ];
+  };
 }

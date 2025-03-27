@@ -109,38 +109,18 @@ in
         ];
       });
 
-      ubootNanoPCT6 = final.buildUBoot {
+      ubootNanoPCT6 = super.buildUBoot {
         defconfig = "nanopc-t6-rk3588_defconfig";
         extraMeta.platforms = ["aarch64-linux"];
-        nativeBuildInputs = [
-          final.python3Packages.libfdt
-          final.python3Packages.pyelftools
-          final.python3Packages.setuptools
-          final.dtc
-          final.bison
-          final.flex
-          final.openssl
-          final.util-linux
-          final.gnutls
-          final.ubootTools
-        ];
+        prePatch = ''
+          patch -p1 < ${./rockchip-u-boot.dtsi.patch}
+        '';
         extraMakeFlags = [
           "BL31=${pkgs.armTrustedFirmwareRK3588}/bl31.elf"
           "ROCKCHIP_TPL=${pkgs.rkbin.TPL_RK3588}"
           "TEE=${final.optee-os-rockchip-rk3588}/tee-raw.bin"
-          "all"
         ];
-        patchPhase = ''
-          patch -p1 < ${./rockchip-u-boot.dtsi.patch}
-          ln -sf ${pkgs.armTrustedFirmwareRK3588}/bl31.elf bl31.elf
-          ln -sf ${final.optee-os-rockchip-rk3588}/tee-raw.bin tee.bin
-          substituteInPlace tools/binman/main.py \
-            --replace-warn '#!/usr/bin/env python3' '#!${pkgs.python3}/bin/python3'
-        '';
-        postInstall = ''
-          mkimage -l u-boot.itb
-        '';
-        filesToInstall = [ "u-boot.itb" "idbloader.img" "dts/upstream/src/arm64/rockchip/rk3588-nanopc-t6.dtb" ];
+        filesToInstall = [ "u-boot.itb" "idbloader.img" ];
       };
 
       libdogecoin-optee-ta-libs = final.stdenv.mkDerivation rec {
