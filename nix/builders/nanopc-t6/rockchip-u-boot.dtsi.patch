@@ -1,5 +1,9 @@
 diff --git a/arch/arm/dts/rockchip-u-boot.dtsi b/arch/arm/dts/rockchip-u-boot.dtsi
+<<<<<<< Updated upstream
 index c8c928c7e5..a2d27bb884 100644
+=======
+index c8c928c7e5..13e69f7cae 100644
+>>>>>>> Stashed changes
 --- a/arch/arm/dts/rockchip-u-boot.dtsi
 +++ b/arch/arm/dts/rockchip-u-boot.dtsi
 @@ -99,19 +99,16 @@
@@ -27,3 +31,15 @@ index c8c928c7e5..a2d27bb884 100644
  					};
  #ifdef CONFIG_SPL_FIT_SIGNATURE
  					hash {
+<<<<<<< Updated upstream
+=======
+@@ -161,7 +158,7 @@
+ #else
+ 					fit,firmware = "op-tee", "u-boot";
+ #endif
+-					fit,loadables;
++					fit,loadables = "aft-2", "op-tee";
+ 				};
+ 			};
+ 		};
+>>>>>>> Stashed changes
