@@ -112,13 +112,10 @@ in
       ubootNanoPCT6 = super.buildUBoot {
         defconfig = "nanopc-t6-rk3588_defconfig";
         extraMeta.platforms = ["aarch64-linux"];
-        prePatch = ''
-          patch -p1 < ${./rockchip-u-boot.dtsi.patch}
-        '';
         extraMakeFlags = [
           "BL31=${pkgs.armTrustedFirmwareRK3588}/bl31.elf"
           "ROCKCHIP_TPL=${pkgs.rkbin.TPL_RK3588}"
-          "TEE=${final.optee-os-rockchip-rk3588}/tee-raw.bin"
+          "TEE=${final.optee-os-rockchip-rk3588}/tee.bin"
         ];
         filesToInstall = [ "u-boot.itb" "idbloader.img" ];
       };
