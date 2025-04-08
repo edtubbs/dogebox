@@ -88,8 +88,4 @@
       } ];
     }
   ];
-
-  services.tee-supplicant = {
-    enable = true;
-  };
 }
