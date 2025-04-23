@@ -16,24 +16,14 @@
       makeModulesClosure = x:
         super.makeModulesClosure (x // { allowMissing = true; });
 
-#  nixpkgs.overlays = [
-#    (final: super: {
-#      optee-os-rockchip-rk3588 = final.buildOptee {
-#        platform = "rockchip-rk3588";
-#        version = "4.5.0";
-#        src = final.fetchFromGitHub {
-#          owner = "OP-TEE";
-#          repo = "optee_os";
-#          rev = "4.5.0";
-#          hash = "sha256-LzyRR0tw9dsMEyi5hGJ/IIEVV6mlHhu+0YuTomTbJ6A=";
-#        };
-
-      optee-os-rockchip-rk3588 = super.buildOptee {
+      optee-os-rockchip-rk3588 = final.buildOptee {
         platform = "rockchip-rk3588";
-        version = "8bfd4aaef4787c92ead998385437936c36da05b6";
-        src = final.fetchurl {
-          url = "https://github.com/edtubbs/optee_os/archive/8bfd4aaef4787c92ead998385437936c36da05b6.tar.gz";
-          hash = "sha256-wL4FsbzDsQBcCHkqISv8OAJw6PIcWavNp5lAfr/NLWs=";
+        version = "4.6.0";
+        src = final.fetchFromGitHub {
+          owner = "OP-TEE";
+          repo = "optee_os";
+          rev = "4.6.0";
+          hash = "sha256-4z706DNfZE+CAPOa362CNSFhAN1KaNyKcI9C7+MRccs=";
         };
         extraMakeFlags = [
           "CFG_TEE_CORE_LOG_LEVEL=0"
@@ -45,12 +35,12 @@
       };
 
       optee-client = super.optee-client.overrideAttrs (old: {
-        version = "4.5.0";
+        version = "4.6.0";
         src = final.fetchFromGitHub {
           owner = "OP-TEE";
           repo = "optee_client";
-          rev = "4.5.0";
-          hash = "sha256-j4ZMaop3H3yNOWdrprEwM4ALN+o9C+smprrGjbotkEs=";
+          rev = "4.6.0";
+          hash = "sha256-hHEIn0WU4XfqwZbOdg9kwSDxDcvK7Tvxtelamfc3IRM=";
         };
       });
 
@@ -78,10 +68,10 @@
 
       libdogecoin-optee-ta-libs = final.stdenv.mkDerivation rec {
         pname = "libdogecoin-optee-ta-libs";
-        version = "0.1.4-dogebox-enclave";
+        version = "0.1.4";
         src = final.fetchurl {
-          url = "https://github.com/edtubbs/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-U7Jk+/n9HmuhMM5kUuBou7YUIwNa+bOMUsoV2tIDT/Y=";
+          url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
+          hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
         };
 
         buildInputs = [
@@ -129,10 +119,10 @@
 
       libdogecoin-optee-host-libs = final.stdenv.mkDerivation rec {
         pname = "libdogecoin-optee-host-libs";
-        version = "0.1.4-dogebox-enclave";
+        version = "0.1.4";
         src = final.fetchurl {
-          url = "https://github.com/edtubbs/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-U7Jk+/n9HmuhMM5kUuBou7YUIwNa+bOMUsoV2tIDT/Y=";
+          url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
+          hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
         };
 
         buildInputs = [
@@ -178,10 +168,10 @@
 
       libdogecoin-optee-host = final.stdenv.mkDerivation rec {
         pname = "libdogecoin-optee-host";
-        version = "0.1.4-dogebox-enclave";
+        version = "0.1.4";
         src = final.fetchurl {
-          url = "https://github.com/edtubbs/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-U7Jk+/n9HmuhMM5kUuBou7YUIwNa+bOMUsoV2tIDT/Y=";
+          url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
+          hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
         };
         buildInputs = [
           final.autoconf
@@ -215,10 +205,10 @@
 
       libdogecoin-optee-ta = final.stdenv.mkDerivation rec {
         pname = "libdogecoin-optee-ta";
-        version = "0.1.4-dogebox-enclave";
+        version = "0.1.4";
         src = final.fetchurl {
-          url = "https://github.com/edtubbs/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-U7Jk+/n9HmuhMM5kUuBou7YUIwNa+bOMUsoV2tIDT/Y=";
+          url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
+          hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
         };
         buildInputs = [
           final.autoconf
@@ -353,4 +343,10 @@
     wantedBy = [ "basic.target" "runOnceOnFirstBoot.service" ];
   };
 
+  services.pcscd.enable = true;
+  services.udev.packages = [ pkgs.yubikey-personalization ];
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="usb", GROUP="69", MODE="0660"
+    ACTION=="add", KERNEL=="hidraw*", GROUP="69", MODE="0660"
+  '';
 }
