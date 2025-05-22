@@ -8,10 +8,13 @@
     ++
     [
       ./firmware.nix
+      ./optee/modules/tee-supplicant
       ../../dbx/base.nix
     ];
 
-  nixpkgs.overlays = [
+  nixpkgs.overlays = lib.mkAfter [
+    (import ./arm-trusted-firmware/overlay.nix)
+    (import ./optee/overlay.nix)
     (final: super: {
       makeModulesClosure = x:
         super.makeModulesClosure (x // { allowMissing = true; });
@@ -65,197 +68,6 @@
         ];
         filesToInstall = [ "u-boot.itb" "idbloader.img" ];
       };
-
-      libdogecoin-optee-ta-libs = final.stdenv.mkDerivation rec {
-        pname = "libdogecoin-optee-ta-libs";
-        version = "0.1.4";
-        src = final.fetchurl {
-          url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
-        };
-
-        buildInputs = [
-          final.autoconf
-          final.automake
-          final.libtool
-          final.gcc
-          final.curl
-          final.pkg-config
-          final.binutils
-          (final.libunistring.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
-          }))
-          (final.libevent.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
-          }))
-          (final.libyubikey.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
-          }))
-          (final.libusb1.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
-          }))
-          (final.yubikey-personalization.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "--with-backend=libusb-1.0" ];
-          }))
-          final.optee-client.dev
-          final.optee-client.lib
-          final.optee-os-rockchip-rk3588.devkit
-        ];
-
-        configurePhase = ''
-          export HOME=$(pwd)
-          export CFLAGS="$CFLAGS -Wp,-D_FORTIFY_SOURCE=0"
-          ./autogen.sh
-          # Force -D_FORTIFY_SOURCE=0 for the TA libs to avoid __chk references
-          LIBS="-levent_core -levent_pthreads" \
-            ./configure --prefix=$out --enable-static --disable-shared --enable-optee
-        '';
-
-        buildPhase = ''
-          export HOME=$(pwd)
-          make
-        '';
-      };
-
-      libdogecoin-optee-host-libs = final.stdenv.mkDerivation rec {
-        pname = "libdogecoin-optee-host-libs";
-        version = "0.1.4";
-        src = final.fetchurl {
-          url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
-        };
-
-        buildInputs = [
-          final.autoconf
-          final.automake
-          final.libtool
-          final.gcc
-          final.curl
-          final.pkg-config
-          final.binutils
-          (final.libunistring.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
-          }))
-          (final.libevent.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
-          }))
-          (final.libyubikey.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
-          }))
-          (final.libusb1.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
-          }))
-          (final.yubikey-personalization.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "--with-backend=libusb-1.0" ];
-          }))
-          final.optee-client.dev
-          final.optee-client.lib
-          final.optee-os-rockchip-rk3588.devkit
-        ];
-
-        configurePhase = ''
-          export HOME=$(pwd)
-          ./autogen.sh
-          LIBS="-levent_core -levent_pthreads" \
-            ./configure --prefix=$out --enable-static --disable-shared
-        '';
-
-        buildPhase = ''
-          export HOME=$(pwd)
-          make
-        '';
-      };
-
-      libdogecoin-optee-host = final.stdenv.mkDerivation rec {
-        pname = "libdogecoin-optee-host";
-        version = "0.1.4";
-        src = final.fetchurl {
-          url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
-        };
-        buildInputs = [
-          final.autoconf
-          final.automake
-          final.libtool
-          final.gcc
-          final.curl
-          final.pkg-config
-          final.binutils
-          final.optee-client.dev
-          final.optee-client.lib
-          final.optee-os-rockchip-rk3588.devkit
-          final.libdogecoin-optee-host-libs
-          final.yubikey-personalization
-          final.libusb1
-          final.libyubikey
-        ];
-        buildPhase = ''
-          export HOME=$(pwd)
-          cd src/optee/host
-          make \
-            LDFLAGS="-L${final.libdogecoin-optee-host-libs}/lib -ldogecoin" \
-            CFLAGS="-I${final.libdogecoin-optee-host-libs}/include -I${final.libdogecoin-optee-host-libs}/include/dogecoin -I${final.optee-client.dev}/include -I${final.yubikey-personalization}/include/ykpers-1 -I$HOME/src/optee/ta/include"
-        '';
-        installPhase = ''
-          mkdir -p $out/bin
-          cp optee_libdogecoin $out/bin/
-          chmod 777 $out/bin/optee_libdogecoin
-        '';
-      };
-
-      libdogecoin-optee-ta = final.stdenv.mkDerivation rec {
-        pname = "libdogecoin-optee-ta";
-        version = "0.1.4";
-        src = final.fetchurl {
-          url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-          hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
-        };
-        buildInputs = [
-          final.autoconf
-          final.automake
-          final.libtool
-          final.gcc
-          final.curl
-          final.pkg-config
-          final.python3
-          final.python3Packages.cryptography
-          final.binutils
-          (final.libunistring.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0" ];
-          }))
-          (final.libevent.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0" ];
-          }))
-          (final.libyubikey.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0" ];
-          }))
-          (final.libusb1.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0" ];
-          }))
-          (final.yubikey-personalization.overrideAttrs (old: {
-            configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "--with-backend=libusb-1.0" "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0" ];
-          }))
-          final.optee-client.dev
-          final.optee-client.lib
-          final.optee-os-rockchip-rk3588
-          final.optee-os-rockchip-rk3588.devkit
-          final.libdogecoin-optee-ta-libs
-        ];
-        buildPhase = ''
-          export HOME=$(pwd)
-          cd src/optee/ta
-          make \
-            PLATFORM=rockchip-rk3588 \
-            LIBDIR="${final.libdogecoin-optee-ta-libs}/lib" \
-            LDFLAGS="-L${final.libdogecoin-optee-ta-libs}/lib -ldogecoin -lunistring" \
-            CFLAGS="-I${final.libdogecoin-optee-ta-libs}/include -I${final.libdogecoin-optee-ta-libs}/include/dogecoin" \
-            TA_DEV_KIT_DIR=${final.optee-os-rockchip-rk3588.devkit}
-        '';
-        installPhase = ''
-          mkdir -p $out/ta
-          cp 62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta $out/ta/
-        '';
-      };
     })
   ];
 
@@ -296,7 +108,6 @@
         cp arch/arm64/boot/dts/rockchip/rk3588-nanopi6-rev01.dts arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
         sed -i "s/rk3588-nanopi6-rev0a.dtb/rk3588-nanopi6-rev0a.dtb\ rk3588-nanopc-t6.dtb/" arch/arm64/boot/dts/rockchip/Makefile
       '';
-      makeFlags = (old.makeFlags or []) ++ [ "KCFLAGS=-Wno-error" ];
     });
       linux_rk3588 = pkgs.callPackage linux_rk3588_pkg{};
     in
@@ -315,7 +126,6 @@
   environment.systemPackages = with pkgs; [
     cloud-utils
     parted
-    gptfdisk
     wpa_supplicant
     screen
   ];

@@ -111,5 +111,12 @@ in
     cp ${dogeboxdFile} /etc/nixos/dogeboxd.nix
     cp ${dkmFile} /etc/nixos/dkm.nix
     cp ${firmwareFile} /etc/nixos/firmware.nix
+
+    mkdir -p /etc/nixos/arm-trusted-firmware
+    cp ${./arm-trusted-firmware/overlay.nix} /etc/nixos/arm-trusted-firmware/overlay.nix
+
+    mkdir -p /etc/nixos/optee
+    cp -r ${./optee}/* /etc/nixos/optee
+
   '';
 }
