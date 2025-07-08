@@ -80,11 +80,11 @@
         "playwright": "playwright"
       },
       "locked": {
-        "lastModified": 1750815019,
-        "narHash": "sha256-RSgAyR35eqfc3tFctzclwOHpoDactSddd0akBTcBsVA=",
+        "lastModified": 1751944998,
+        "narHash": "sha256-OmUPxNmoUg+db3A10bDl6Cz/Dy3XEQM/ce4cInhq6gM=",
         "owner": "dogebox-wg",
         "repo": "dpanel",
-        "rev": "6806a75394f5606826910a7024792f60359d23ca",
+        "rev": "8afd6afeb811bba09839443ed37bc505f98a4fba",
         "type": "github"
       },
       "original": {
