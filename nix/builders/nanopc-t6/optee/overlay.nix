@@ -24,10 +24,10 @@ in
 
   libdogecoin-optee-ta-libs = super.stdenv.mkDerivation rec {
     pname = "libdogecoin-optee-ta-libs";
-    version = "0.1.4";
+    version = "0.1.5-pre";
     src = super.fetchurl {
       url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-      hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
+      hash = "sha256-oQMR0EzzRcsfZ3DoKnESXanEjm6dk2X+7zFhL+Ae6cs=";
     };
 
     buildInputs = [
@@ -75,10 +75,10 @@ in
 
   libdogecoin-optee-host-libs = super.stdenv.mkDerivation rec {
     pname = "libdogecoin-optee-host-libs";
-    version = "0.1.4";
+    version = "0.1.5-pre";
     src = super.fetchurl {
       url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-      hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
+      hash = "sha256-oQMR0EzzRcsfZ3DoKnESXanEjm6dk2X+7zFhL+Ae6cs=";
     };
 
     buildInputs = [
@@ -124,10 +124,10 @@ in
 
   libdogecoin-optee-host = super.stdenv.mkDerivation rec {
     pname = "libdogecoin-optee-host";
-    version = "0.1.4";
+    version = "0.1.5-pre";
     src = super.fetchurl {
       url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-      hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
+      hash = "sha256-oQMR0EzzRcsfZ3DoKnESXanEjm6dk2X+7zFhL+Ae6cs=";
     };
     buildInputs = [
       super.autoconf
@@ -161,10 +161,10 @@ in
 
   libdogecoin-optee-ta = super.stdenv.mkDerivation rec {
     pname = "libdogecoin-optee-ta";
-    version = "0.1.4";
+    version = "0.1.5-pre";
     src = super.fetchurl {
       url = "https://github.com/dogecoinfoundation/libdogecoin/archive/refs/tags/v${version}.tar.gz";
-      hash = "sha256-4VIO+Rjc7jDi+H+//8OkBiH/yPXYJOYCz2rVzDW6jFA=";
+      hash = "sha256-oQMR0EzzRcsfZ3DoKnESXanEjm6dk2X+7zFhL+Ae6cs=";
     };
     buildInputs = [
       super.autoconf
