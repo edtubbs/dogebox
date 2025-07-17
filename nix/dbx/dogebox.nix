@@ -26,6 +26,7 @@ in
     password = "suchpass";
   };
 
+  # Disable password auth by default for remote (ssh) connections, this won't effect local logins.
   services.openssh.settings.PasswordAuthentication = false;
 
   security.sudo.wheelNeedsPassword = false;
