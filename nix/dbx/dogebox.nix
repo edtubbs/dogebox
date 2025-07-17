@@ -26,6 +26,8 @@ in
     password = "suchpass";
   };
 
+  services.openssh.settings.PasswordAuthentication = false;
+
   security.sudo.wheelNeedsPassword = false;
 
   # These will be overridden by the included dogebox.nix file above, but set defaults.
