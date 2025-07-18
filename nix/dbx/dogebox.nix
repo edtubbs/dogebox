@@ -26,6 +26,7 @@ in
     password = "suchpass";
   };
 
+
   systemd.services.force-password-change = {
     description = "Force password change for shibe on first boot";
     wantedBy = [ "multi-user.target" ];
@@ -35,6 +36,9 @@ in
       ExecStart = "/run/current-system/sw/bin/chage -d 0 shibe";
     };
   };
+
+  # Disable password auth by default for remote (ssh) connections, this won't effect local logins.
+  services.openssh.settings.PasswordAuthentication = false;
 
   security.sudo.wheelNeedsPassword = false;
 

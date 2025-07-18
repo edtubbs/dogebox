@@ -30,11 +30,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1750056416,
-        "narHash": "sha256-AsXDH/z604Gq081dbq8SIbKVNAUo8mukdUgrvzEtSKY=",
+        "lastModified": 1752749147,
+        "narHash": "sha256-8p2xgfLapJdm4HxIymp0KTOeIZGp+RrRxNjooOvRZPc=",
         "owner": "dogebox-wg",
         "repo": "dogebox-nur-packages",
-        "rev": "e142d43fd7086e126b7c114b4cee7470fe0cdbfc",
+        "rev": "ad3615a723323cda8352a65df66837fdbc980487",
         "type": "github"
       },
       "original": {
@@ -56,11 +56,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1751929615,
-        "narHash": "sha256-TvtQdK4Q2kzCu+vF9q42SxDYWKQfsz8GfMsz11Y3/Sc=",
+        "lastModified": 1752771683,
+        "narHash": "sha256-aL9Ef+1r65/24bW6+nfkfud13UhGLu4GqiEKU/wSp4U=",
         "owner": "dogebox-wg",
         "repo": "dogeboxd",
-        "rev": "94ec295130d690a228de01e8cbde55f3a51f6673",
+        "rev": "490d7f78b1ea8f75e53fce9611e650f5dd358ae2",
         "type": "github"
       },
       "original": {
@@ -80,11 +80,11 @@
         "playwright": "playwright"
       },
       "locked": {
-        "lastModified": 1751944998,
-        "narHash": "sha256-OmUPxNmoUg+db3A10bDl6Cz/Dy3XEQM/ce4cInhq6gM=",
+        "lastModified": 1752774291,
+        "narHash": "sha256-zYW7x/Tu/+SJ7IdP5So6AeoUYVTb1xWaLTO7W6NZcmg=",
         "owner": "dogebox-wg",
         "repo": "dpanel",
-        "rev": "8afd6afeb811bba09839443ed37bc505f98a4fba",
+        "rev": "f25856057e70b8f4227532d4a0efedaf1ad3caf0",
         "type": "github"
       },
       "original": {
