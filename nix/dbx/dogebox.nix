@@ -22,8 +22,19 @@ in
     isNormalUser = true;
     extraGroups = [ "wheel" "dogebox" ];
 
-    # Very temporary, until we have SSH key management in dpanel.
+    # Temporary, we force the user to change their password on first login.
     password = "suchpass";
+  };
+
+
+  systemd.services.force-password-change = {
+    description = "Force password change for shibe on first boot";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "getty@tty1.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "/run/current-system/sw/bin/chage -d 0 shibe";
+    };
   };
 
   # Disable password auth by default for remote (ssh) connections, this won't effect local logins.
