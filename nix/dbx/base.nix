@@ -20,7 +20,7 @@
     sandbox-fallback = false;
     substituters = [
       "https://cache.nixos.org/"
-      "https://dbx.nix.dogecoin.org"
+      # "https://dbx.nix.dogecoin.org"
     ];
     system-features = [
       "nixos-test"
@@ -30,7 +30,7 @@
     ];
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      "dbx.nix.dogecoin.org:ODXaHC+9DNqXQ8ZTijaCT4JpieqmOatZeZBbdN51Obc="
+      # "dbx.nix.dogecoin.org:ODXaHC+9DNqXQ8ZTijaCT4JpieqmOatZeZBbdN51Obc="
     ];
     trusted-users = [
       "root"
