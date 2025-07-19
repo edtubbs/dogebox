@@ -42,6 +42,9 @@
 
   systemd.tmpfiles.rules = [
     "d /opt/dogebox 0700 dogeboxd dogebox -"
+
+    # Create a dev folder, and give both the shibe user and dogebox group write perms.
+    "d /opt/dev 0770 shibe dogebox -"
   ];
 
   systemd.services.dogeboxd = {
