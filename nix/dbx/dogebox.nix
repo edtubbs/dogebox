@@ -26,14 +26,17 @@ in
     password = "suchpass";
   };
 
-
   systemd.services.force-password-change = {
     description = "Force password change for shibe on first boot";
     wantedBy = [ "multi-user.target" ];
     before = [ "getty@tty1.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "/run/current-system/sw/bin/chage -d 0 shibe";
+      ExecStart = let
+        script = pkgs.writeScript "force-passwd-change" ''
+          #!${pkgs.runtimeShell}
+          [ ! -f "/opt/passwd-changed" ] && /run/current-system/sw/bin/chage -d 0 shibe && touch /opt/passwd-changed'';
+        in "${script}";
     };
   };
 
