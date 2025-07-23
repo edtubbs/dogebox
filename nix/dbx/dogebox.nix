@@ -35,7 +35,9 @@ in
       ExecStart = let
         script = pkgs.writeScript "force-passwd-change" ''
           #!${pkgs.runtimeShell}
-          [ ! -f "/opt/passwd-changed" ] && /run/current-system/sw/bin/chage -d 0 shibe && touch /opt/passwd-changed'';
+          [ ! -f "/opt/passwd-changed" ] && /run/current-system/sw/bin/chage -d 0 shibe && touch /opt/passwd-changed
+          exit 0
+          '';
         in "${script}";
     };
   };
