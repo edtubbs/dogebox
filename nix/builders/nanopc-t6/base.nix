@@ -131,6 +131,12 @@
     wpa_supplicant
   ];
 
+  environment.etc."idbloader.img".source =
+    "${pkgs.ubootNanoPCT6}/idbloader.img";
+
+  environment.etc."u-boot.itb".source =
+    "${pkgs.ubootNanoPCT6}/u-boot.itb";
+
   # Initial hostName for the box to respond to dogebox.local for first boot and installation steps.
   # Will be replaced by dogeboxd configuration
   networking.hostName = lib.mkDefault ("dogebox");
