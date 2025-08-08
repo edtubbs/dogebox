@@ -15,20 +15,20 @@
     };
 
     dpanel = {
-      url = "github:dogebox-wg/dpanel/chore/nixos-25.05";
+      url = "github:dogebox-wg/dpanel";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
 
     dogeboxd = {
-      url = "github:dogebox-wg/dogeboxd/chore/nixos-25.05";
+      url = "github:dogebox-wg/dogeboxd";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
       inputs.dpanel-src.follows = "dpanel";
     };
 
     dkm = {
-      url = "github:dogebox-wg/dkm/chore/nixos-25.05";
+      url = "github:dogebox-wg/dkm";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
