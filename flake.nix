@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-24.11";
+    nixpkgs.url = "nixpkgs/nixos-25.05";
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
@@ -364,6 +364,11 @@
           "dev-t6" = {
             type = "app";
             program = "${getBuildWithDevOverridesScript "aarch64-linux" "t6"}/bin/build-with-dev-overrides";
+          };
+
+          "dev-qemu" = {
+            type = "app";
+            program = "${getBuildWithDevOverridesScript "aarch64-linux" "qemu"}/bin/build-with-dev-overrides";
           };
 
           "switch-remote-host" = {
