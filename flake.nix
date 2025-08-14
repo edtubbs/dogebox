@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:jmbaur/nixpkgs/optee-updates";
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
@@ -21,7 +21,7 @@
     };
 
     dogeboxd = {
-      url = "github:dogebox-wg/dogeboxd";
+      url = "github:edtubbs/dogeboxd/optee-updates";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
       inputs.dpanel-src.follows = "dpanel";
