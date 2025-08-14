@@ -130,7 +130,10 @@
     parted
     screen
     wpa_supplicant
+    ubootNanoPCT6
   ];
+
+  environment.etc."uboot".source = pkgs.ubootNanoPCT6;
 
   # Initial hostName for the box to respond to dogebox.local for first boot and installation steps.
   # Will be replaced by dogeboxd configuration
