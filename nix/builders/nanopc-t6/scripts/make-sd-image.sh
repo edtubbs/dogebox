@@ -2,7 +2,7 @@
 WORK_DIR=${1:-nixos-arm64}
 CWD=$(pwd)
 IMAGE_FILE=${2:-${WORK_DIR}-sd-$(date +%Y%m%d).img}
-IMAGE_SIZE=${3:-10055714}
+IMAGE_SIZE=${3:-10070000}
 
 pushd $WORK_DIR
 
