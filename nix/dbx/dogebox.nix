@@ -9,13 +9,17 @@ let
     if builtins.pathExists devDatapathFile
     then builtins.toPath (lib.removeSuffix "\n" (builtins.readFile devDatapathFile))
     else defaultDataPath;
+
+  dogeboxDataNixPath = "${dogeboxDataPath}/nix/dogebox.nix";
 in
 {
   imports =
     [
       ./dkm.nix
       ./dogeboxd.nix
-      "${dogeboxDataPath}/nix/dogebox.nix"
+    ]
+    ++ lib.optionals (builtins.pathExists dogeboxDataNixPath) [
+      dogeboxDataNixPath
     ]
     ++ lib.optionals (remoteRebuildTarget != "") [
       "${remoteRebuildTarget}/dogebox.nix"
