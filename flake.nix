@@ -56,6 +56,11 @@
         dev = ./nix/builders/dev/base.nix;
       };
 
+      # This is used to determine if we're in developer mode, which will,
+      # among other things, prevent services from automatically starting.
+      # This is a fallback for when the nix devMode flag is not set.
+      isOSDeveloperMode = builtins.pathExists "/etc/nixos-dev";
+
       getCopyFlakeScript =
         system: self:
         let
@@ -168,7 +173,7 @@
         { 
           system,
           builderType,
-          devMode ? false,
+          devMode ? isOSDeveloperMode,
           devBootloader ? false
         }:
         let
@@ -186,7 +191,7 @@
         let
           system = arch + "-linux";
           isBaseBuilder = false;
-          devMode = false;
+          devMode = isOSDeveloperMode;
           devBootloader = false;
         in
         nixos-generators.nixosGenerate {
