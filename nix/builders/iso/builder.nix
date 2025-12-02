@@ -1,11 +1,12 @@
 {
+  lib,
   arch,
   dbxRelease,
   ...
 }:
 
 {
-  isoImage.isoName = "dogebox-${dbxRelease}-${arch}.iso";
+  image.baseName = lib.mkForce "dogebox-${dbxRelease}-${arch}";
   isoImage.prependToMenuLabel = "DogeboxOS (";
   isoImage.appendToMenuLabel = ")";
 }
