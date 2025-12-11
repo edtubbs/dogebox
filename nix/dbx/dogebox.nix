@@ -13,17 +13,16 @@ let
   dogeboxDataNixPath = "${dogeboxDataPath}/nix/dogebox.nix";
 in
 {
-  imports =
-    [
-      ./dkm.nix
-      ./dogeboxd.nix
-    ]
-    ++ lib.optionals (builtins.pathExists "/opt/dogebox/nix/dogebox.nix") [
-      /opt/dogebox/nix/dogebox.nix
-    ]
-    ++ lib.optionals (remoteRebuildTarget != "") [
-      "${remoteRebuildTarget}/dogebox.nix"
-    ];
+  imports = [
+    ./dkm.nix
+    ./dogeboxd.nix
+  ]
+  ++ lib.optionals (builtins.pathExists "/opt/dogebox/nix/dogebox.nix") [
+    /opt/dogebox/nix/dogebox.nix
+  ]
+  ++ lib.optionals (remoteRebuildTarget != "") [
+    "${remoteRebuildTarget}/dogebox.nix"
+  ];
 
   users.groups.dogebox = { };
 
