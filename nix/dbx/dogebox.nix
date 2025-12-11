@@ -4,23 +4,25 @@ let
   remoteRebuildTarget = builtins.getEnv "REMOTE_REBUILD_DOGEBOX_DIRECTORY";
 in
 {
-  imports =
-    [
-      ./dkm.nix
-      ./dogeboxd.nix
-    ]
-    ++ lib.optionals (builtins.pathExists "/opt/dogebox/nix/dogebox.nix") [
-      /opt/dogebox/nix/dogebox.nix
-    ]
-    ++ lib.optionals (remoteRebuildTarget != "") [
-      "${remoteRebuildTarget}/dogebox.nix"
-    ];
+  imports = [
+    ./dkm.nix
+    ./dogeboxd.nix
+  ]
+  ++ lib.optionals (builtins.pathExists "/opt/dogebox/nix/dogebox.nix") [
+    /opt/dogebox/nix/dogebox.nix
+  ]
+  ++ lib.optionals (remoteRebuildTarget != "") [
+    "${remoteRebuildTarget}/dogebox.nix"
+  ];
 
   users.groups.dogebox = { };
 
   users.users.shibe = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "dogebox" ];
+    extraGroups = [
+      "wheel"
+      "dogebox"
+    ];
 
     # Temporary, we force the user to change their password on first login.
     password = "suchpass";
@@ -32,13 +34,15 @@ in
     before = [ "getty@tty1.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = let
-        script = pkgs.writeScript "force-passwd-change" ''
-          #!${pkgs.runtimeShell}
-          [ ! -f "/opt/passwd-changed" ] && /run/current-system/sw/bin/chage -d 0 shibe && touch /opt/passwd-changed
-          exit 0
+      ExecStart =
+        let
+          script = pkgs.writeScript "force-passwd-change" ''
+            #!${pkgs.runtimeShell}
+            [ ! -f "/opt/passwd-changed" ] && /run/current-system/sw/bin/chage -d 0 shibe && touch /opt/passwd-changed
+            exit 0
           '';
-        in "${script}";
+        in
+        "${script}";
     };
   };
 
