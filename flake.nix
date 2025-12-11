@@ -1,6 +1,6 @@
-{
+rec {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-25.05";
+    nixpkgs.url = "nixpkgs/nixos-25.11";
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
@@ -15,20 +15,20 @@
     };
 
     dpanel = {
-      url = "github:dogebox-wg/dpanel";
+      url = "github:dogebox-wg/dpanel/chore/nixos-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
 
     dogeboxd = {
-      url = "github:dogebox-wg/dogeboxd";
+      url = "github:dogebox-wg/dogeboxd/chore/nixos-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
       inputs.dpanel-src.follows = "dpanel";
     };
 
     dkm = {
-      url = "github:dogebox-wg/dkm";
+      url = "github:dogebox-wg/dkm/chore/nixos-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
@@ -36,6 +36,10 @@
     dogebox-nur-packages = {
       url = "github:dogebox-wg/dogebox-nur-packages";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    rockchip = {
+      url = "github:nabam/nixos-rockchip";
     };
   };
   outputs =
@@ -71,36 +75,23 @@
           ${pkgs.rsync}/bin/rsync -a --delete --exclude='.git' "${self}/" "/etc/nixos/"
         '';
 
-      getSetOptScript =
-        builderType: isBaseBuilder:
-        ''
-          mkdir -p /opt
-          echo '${builderType}' > /opt/build-type
+      getSetOptScript = builderType: isBaseBuilder: ''
+        mkdir -p /opt
+        echo '${builderType}' > /opt/build-type
 
-          if [ -f /opt/dbx-installed ]; then
-            rm -f /opt/ro-media
-            touch /opt/rw-media
-          else
-            rm -f /opt/rw-media
-            touch /opt/ro-media
-          fi
-        '';
+        if [ -f /opt/dbx-installed ]; then
+          rm -f /opt/ro-media
+          touch /opt/rw-media
+        else
+          rm -f /opt/rw-media
+          touch /opt/ro-media
+        fi
+      '';
 
       versionScript =
         let
           flakeLock = ./flake.lock;
           flakeLockContent = builtins.readFile flakeLock;
-          flakeLockJson = builtins.fromJSON flakeLockContent;
-
-          # We read these from the lock so that we only need to specify the flake
-          # name, rather than the full flake URL, which has to contain versioning info.
-          dbxdFlake = builtins.getFlake (
-            "github:dogebox-wg/dogeboxd/" + flakeLockJson.nodes.dogeboxd.locked.rev
-          );
-          dpanelFlake = builtins.getFlake (
-            "github:dogebox-wg/dpanel/" + flakeLockJson.nodes.dpanel.locked.rev
-          );
-          dkmFlake = builtins.getFlake ("github:dogebox-wg/dkm/" + flakeLockJson.nodes.dkm.locked.rev);
         in
         ''
           mkdir -p /opt/versioning
@@ -113,16 +104,16 @@
 
           # Write out info about our flake inputs for easy access.
           mkdir -p /opt/versioning/dogeboxd
-          echo '${dbxdFlake.rev}' > /opt/versioning/dogeboxd/rev
-          echo '${dbxdFlake.narHash}' > /opt/versioning/dogeboxd/hash
+          echo '${inputs.dogeboxd.rev}' > /opt/versioning/dogeboxd/rev
+          echo '${inputs.dogeboxd.narHash}' > /opt/versioning/dogeboxd/hash
 
           mkdir -p /opt/versioning/dkm
-          echo '${dkmFlake.rev}' > /opt/versioning/dkm/rev
-          echo '${dkmFlake.narHash}' > /opt/versioning/dkm/hash
+          echo '${inputs.dkm.rev}' > /opt/versioning/dkm/rev
+          echo '${inputs.dkm.narHash}' > /opt/versioning/dkm/hash
 
           mkdir -p /opt/versioning/dpanel
-          echo '${dpanelFlake.rev}' > /opt/versioning/dpanel/rev
-          echo '${dpanelFlake.narHash}' > /opt/versioning/dpanel/hash
+          echo '${inputs.dpanel.rev}' > /opt/versioning/dpanel/rev
+          echo '${inputs.dpanel.narHash}' > /opt/versioning/dpanel/hash
         '';
 
       dbxEntryModule = ./nix/dbx/base.nix;
@@ -278,7 +269,8 @@
           '';
         };
 
-      getSwitchRemoteHostScript = system:
+      getSwitchRemoteHostScript =
+        system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
           target = builtins.getEnv "TARGET";

@@ -1,13 +1,12 @@
 { lib, pkgs, ... }:
 
 {
-  imports =
-    [
-      ./dogebox.nix
-    ]
-    ++ lib.optionals (builtins.pathExists "/etc/nixos/hardware-configuration.nix") [
-      /etc/nixos/hardware-configuration.nix
-    ];
+  imports = [
+    ./dogebox.nix
+  ]
+  ++ lib.optionals (builtins.pathExists "/etc/nixos/hardware-configuration.nix") [
+    /etc/nixos/hardware-configuration.nix
+  ];
 
   nix.settings = {
     auto-optimise-store = false;
@@ -48,7 +47,6 @@
     wget
     wirelesstools
   ];
-
 
   # DO NOT CHANGE THIS. EVER. EVEN WHEN UPDATING YOUR SYSTEM PAST 25.05.
   system.stateVersion = "25.05";
