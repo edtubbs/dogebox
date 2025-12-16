@@ -106,7 +106,7 @@ jobs:
             system-features = nixos-test benchmark big-parallel kvm
       - name: Build Dogebox OS T6
         run: |
-          nix build .#packages.aarch64-linux.t6 -o result-t6
+          nix build .#packages.aarch64-linux.t6 -o result-t6 --print-build-logs --no-link
           echo "Copying artefacts"
           mkdir -p artifacts
           cp ./result-t6/*.img artifacts/
