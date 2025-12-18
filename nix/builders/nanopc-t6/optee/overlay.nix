@@ -2,12 +2,25 @@ self: super:
 
 let
   optee-os-pkgs = import ./pkgs/optee-os/default.nix {
-    inherit (super) stdenv fetchFromGitHub dtc lib pkgsBuildBuild;
+    inherit (super)
+      stdenv
+      fetchFromGitHub
+      dtc
+      lib
+      pkgsBuildBuild
+      ;
   };
 in
 {
   optee-client = import ./pkgs/by-name/op/optee-client/package.nix {
-    inherit (super) stdenv fetchFromGitHub lib libuuid pkg-config which;
+    inherit (super)
+      stdenv
+      fetchFromGitHub
+      lib
+      libuuid
+      pkg-config
+      which
+      ;
   };
 
   optee-os-rockchip-rk3588 = optee-os-pkgs.buildOptee {
@@ -39,19 +52,35 @@ in
       super.pkg-config
       super.binutils
       (super.libunistring.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+        ];
       }))
       (super.libevent.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+        ];
       }))
       (super.libyubikey.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+        ];
       }))
       (super.libusb1.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+        ];
       }))
       (super.yubikey-personalization.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "--with-backend=libusb-1.0" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+          "--with-backend=libusb-1.0"
+        ];
       }))
       self.optee-client.dev
       self.optee-client.lib
@@ -90,19 +119,35 @@ in
       super.pkg-config
       super.binutils
       (super.libunistring.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+        ];
       }))
       (super.libevent.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+        ];
       }))
       (super.libyubikey.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+        ];
       }))
       (super.libusb1.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+        ];
       }))
       (super.yubikey-personalization.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "--with-backend=libusb-1.0" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+          "--with-backend=libusb-1.0"
+        ];
       }))
       self.optee-client.dev
       self.optee-client.lib
@@ -177,19 +222,40 @@ in
       super.python3Packages.cryptography
       super.binutils
       (super.libunistring.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+          "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0"
+        ];
       }))
       (super.libevent.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+          "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0"
+        ];
       }))
       (super.libyubikey.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+          "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0"
+        ];
       }))
       (super.libusb1.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+          "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0"
+        ];
       }))
       (super.yubikey-personalization.overrideAttrs (old: {
-        configureFlags = (old.configureFlags or []) ++ [ "--disable-shared" "--enable-static" "--with-backend=libusb-1.0" "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0" ];
+        configureFlags = (old.configureFlags or [ ]) ++ [
+          "--disable-shared"
+          "--enable-static"
+          "--with-backend=libusb-1.0"
+          "CFLAGS=-Wp,-D_FORTIFY_SOURCE=0"
+        ];
       }))
       self.optee-client.dev
       self.optee-client.lib
