@@ -15,7 +15,7 @@ rec {
     };
 
     dpanel = {
-      url = "github:dogebox-wg/dpanel";
+      url = "github:edtubbs/dpanel/update-stats-label";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
