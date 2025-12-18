@@ -15,7 +15,7 @@ rec {
     };
 
     dpanel = {
-      url = "github:dogebox-wg/dpanel/chore/nixos-25.11";
+      url = "github:edtubbs/dpanel/update-stats-txid";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
