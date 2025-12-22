@@ -103,7 +103,6 @@ jobs:
           install_url: https://releases.nixos.org/nix/nix-2.32.1/install
           extra_nix_config: |
             experimental-features = nix-command flakes
-            system-features = nixos-test benchmark big-parallel kvm
       - name: Build Dogebox OS T6
         run: |
           nix build .#packages.aarch64-linux.t6 -o result-t6
