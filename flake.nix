@@ -1,6 +1,6 @@
 rec {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:jmbaur/nixpkgs/optee-updates";
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
