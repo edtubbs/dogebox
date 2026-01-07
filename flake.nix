@@ -34,7 +34,7 @@ rec {
     };
 
     dogebox-nur-packages = {
-      url = "github:dogebox-wg/dogebox-nur-packages";
+      url = "github:edtubbs/dogebox-nur-packages/v0.1.5-pre-dashb0rd";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
