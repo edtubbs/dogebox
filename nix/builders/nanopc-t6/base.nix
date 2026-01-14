@@ -102,6 +102,9 @@
       name = "rk3588-nanopc-t6.dtsi.patch";
       patch = ./rk3588-nanopc-t6.dtsi.patch;
       extraConfig = ''
+        MFD_RK8XX y
+        MFD_RK8XX_SPI y
+        INPUT_RK805_PWRKEY y
         PINCTRL_RK805  y
         RESET_GPIO y
         POWER_RESET_GPIO y
