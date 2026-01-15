@@ -150,7 +150,7 @@
   networking.wireless.iwd.enable = true;
 
   services.create_ap = {
-    enable = true;
+    enable = lib.mkDefault true;
     settings = {
       INTERNET_IFACE = "lo";
       WIFI_IFACE = "wlan0";
