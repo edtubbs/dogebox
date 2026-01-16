@@ -30,11 +30,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1765518068,
-        "narHash": "sha256-ryFN/u0VKMEfRbd5Kw05hjpvTYXQl3blnTEWjFUC40w=",
+        "lastModified": 1768595351,
+        "narHash": "sha256-IsemMssZhkryZyoOfij7c6Yi49/Y1jIM62TAS1R4mKY=",
         "owner": "dogebox-wg",
         "repo": "dogebox-nur-packages",
-        "rev": "28a5e6902d73bf4874c881c5672ac2e52a24439d",
+        "rev": "c2c6f1633bdc3e089f4775766b8f3573743b2e48",
         "type": "github"
       },
       "original": {
@@ -56,11 +56,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1766095039,
-        "narHash": "sha256-08bBMFHk8Txuuq+pAzCqM5VffG28iaEIAuf9P5MKkB4=",
+        "lastModified": 1768597180,
+        "narHash": "sha256-yodPQNDOD20sqcQopUjLAnfQpZrZvEAssqdV9R1+0VQ=",
         "owner": "dogebox-wg",
         "repo": "dogeboxd",
-        "rev": "72c51b88c7f5d5dd1acb2bed6e310bee51759ece",
+        "rev": "b071d229d0e169a96f56898d82b0a4339c70a3fd",
         "type": "github"
       },
       "original": {
@@ -248,11 +248,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1765838191,
-        "narHash": "sha256-m5KWt1nOm76ILk/JSCxBM4MfK3rYY7Wq9/TZIIeGnT8=",
+        "lastModified": 1768323494,
+        "narHash": "sha256-yBXJLE6WCtrGo7LKiB6NOt6nisBEEkguC/lq/rP3zRQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "c6f52ebd45e5925c188d1a20119978aa4ffd5ef6",
+        "rev": "2c3e5ec5df46d3aeee2a1da0bfedd74e21f4bf3a",
         "type": "github"
       },
       "original": {
