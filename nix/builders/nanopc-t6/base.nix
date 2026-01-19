@@ -9,21 +9,11 @@
 
 {
   nixpkgs.overlays = lib.mkAfter [
-    (import ./arm-trusted-firmware/overlay.nix)
-    (import ./optee/overlay.nix)
-
     (final: super: {
       makeModulesClosure = x: super.makeModulesClosure (x // { allowMissing = true; });
 
       optee-os-rockchip-rk3588 = final.buildOptee {
         platform = "rockchip-rk3588";
-        version = "4.6.0";
-        src = final.fetchFromGitHub {
-          owner = "OP-TEE";
-          repo = "optee_os";
-          rev = "4.6.0";
-          hash = "sha256-4z706DNfZE+CAPOa362CNSFhAN1KaNyKcI9C7+MRccs=";
-        };
         extraMakeFlags = [
           "CFG_TEE_CORE_LOG_LEVEL=0"
           "CFG_ATTESTATION_PTA=y"
@@ -33,26 +23,8 @@
         ];
       };
 
-      optee-client = super.optee-client.overrideAttrs (old: {
-        version = "4.6.0";
-        src = final.fetchFromGitHub {
-          owner = "OP-TEE";
-          repo = "optee_client";
-          rev = "4.6.0";
-          hash = "sha256-hHEIn0WU4XfqwZbOdg9kwSDxDcvK7Tvxtelamfc3IRM=";
-        };
-      });
-
       armTrustedFirmwareRK3588 = super.armTrustedFirmwareRK3588.overrideAttrs (old: {
-        prePatch = ''
-          sed -i 's/#define FDT_BUFFER_SIZE 0x20000/#define FDT_BUFFER_SIZE 0x60000/g' \
-            plat/rockchip/common/params_setup.c
-        '';
-        makeFlags = old.makeFlags ++ [
-          "SPD=opteed"
-          "LOG_LEVEL=40"
-          "bl31"
-        ];
+        makeFlags = old.makeFlags ++ [ "SPD=opteed" "LOG_LEVEL=40" "bl31" ];
       });
 
       uBootNanoPCT6 = super.buildUBoot {
