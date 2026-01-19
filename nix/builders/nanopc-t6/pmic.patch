@@ -25,7 +25,7 @@ index fafeabe9a..bc05f4bba 100644
 +		 *    forcing the state to switch to ACTIVE mode,
 +		 *    and simultaneously pull down the RESETB PIN for 5mS before releasing
 +		 */
-+		rockchip,reset-mode = <RK806_RESET>;
++		rockchip,reset-mode = <RK806_RESET_NOTIFY>;
  
  		system-power-controller;
  
