@@ -16,9 +16,9 @@ index fafeabe9a..bc05f4bba 100644
          pinctrl-names = "default";
 -		pinctrl-0 = <&pmic_pins>, <&rk806_dvs1_null>,
 -			    <&rk806_dvs2_null>, <&rk806_dvs3_null>;
-+		pinctrl-0 = <&pmic_pins>, <&rk806_dvs1_rst>, <&rk806_dvs2_null>, <&rk806_dvs3_null>;
++		pinctrl-0 = <&pmic_pins>, <&rk806_dvs1_null>, <&rk806_dvs2_rst>, <&rk806_dvs3_null>;
 
-+		rk806_dvs1_rst: dvs1-rst-pins {
++		rk806_dvs2_rst: dvs2-rst-pins {
 +			pins = "gpio_pwrctrl1";
 +			function = "pin_fun3";
 +		};
