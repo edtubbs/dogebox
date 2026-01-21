@@ -16,7 +16,7 @@ index fafeabe9a..bc05f4bba 100644
  		pinctrl-names = "default";
 -		pinctrl-0 = <&pmic_pins>, <&rk806_dvs1_null>,
 -			    <&rk806_dvs2_null>, <&rk806_dvs3_null>;
-+		pinctrl-0 = <&pmic_pins>, <&rk806_dvs1_null>, <&rk806_dvs2_rst>, <&rk806_dvs3_null>;
++		pinctrl-0 = <&pmic_pins>, <&rk806_dvs1_rst>, <&rk806_dvs2_null>, <&rk806_dvs3_null>;
 +
 +		/* RK806_RESTART      0: restart PMU;
 +		 * RK806_RESET        1: reset all the power off reset registers,
@@ -33,17 +33,17 @@ index fafeabe9a..bc05f4bba 100644
  			function = "pin_fun0";
  		};
  
-+		rk806_dvs1_rst: dvs1-null-pins {
++		rk806_dvs1_rst: rk806_dvs1_rst {
 +			pins = "gpio_pwrctrl1";
 +			function = "pin_fun3";
 +		};
 +
-+		rk806_dvs2_rst: dvs2-null-pins {
++		rk806_dvs2_rst: rk806_dvs2_rst {
 +			pins = "gpio_pwrctrl2";
 +			function = "pin_fun3";
 +		};
 +
-+		rk806_dvs3_rst: dvs3-null-pins {
++		rk806_dvs3_rst: rk806_dvs3_rst {
 +			pins = "gpio_pwrctrl3";
 +			function = "pin_fun3";
 +		};
