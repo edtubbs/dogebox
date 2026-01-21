@@ -16,7 +16,7 @@ index fafeabe9a..bc05f4bba 100644
  		pinctrl-names = "default";
 -		pinctrl-0 = <&pmic_pins>, <&rk806_dvs1_null>,
 -			    <&rk806_dvs2_null>, <&rk806_dvs3_null>;
-+		pinctrl-0 = <&pmic_pins>, <&rk806_dvs1_null>, <&rk806_dvs2_rst>, <&rk806_dvs3_null>;
++		pinctrl-0 = <&pmic_pins>, <&rk806_dvs1_null>, <&rk806_dvs2_null>, <&rk806_dvs3_rst>;
 +
 +		/* RK806_RESTART      0: restart PMU;
 +		 * RK806_RESET        1: reset all the power off reset registers,
