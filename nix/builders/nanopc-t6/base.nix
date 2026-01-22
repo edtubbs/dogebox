@@ -63,10 +63,10 @@
       name = "rk3588-nanopc-t6.dtsi.patch";
       patch = ./rk3588-nanopc-t6.dtsi.patch;
       extraConfig = ''
-        CONFIG_MFD_RK8XX=y
-        CONFIG_MFD_RK8XX_SPI=y
-        CONFIG_REGULATOR_RK808=y
-        CONFIG_INPUT_RK805_PWRKEY=y
+        MFD_RK8XX y        
+        MFD_RK8XX_SPI y
+        REGULATOR_RK808 y
+        INPUT_RK805_PWRKEY y
       '';
     }
     {
