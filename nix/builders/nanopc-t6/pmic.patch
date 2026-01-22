@@ -10,7 +10,7 @@ index fafeabe9a..bc05f4bba 100644
 -			    <&rk806_dvs2_null>, <&rk806_dvs3_null>;
 +		pinctrl-0 = <&pmic_pins>, <&rk806_dvs1_null>, <&rk806_dvs2_null>, <&rk806_dvs3_null>;
 +
-+		/* rockchip,reset-mode: 0 = Restart PMU; 1 = Register Reset; 2 = Register Reset + RESETB pulse */
++		/* rockchip,reset-mode: 0 = Restart PMU; 1 = Register Reset; 2 = Reset + Pin Pulse */
 +		rockchip,reset-mode = <0>;
  
  		system-power-controller;
