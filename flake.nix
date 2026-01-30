@@ -15,7 +15,7 @@ rec {
     };
 
     dpanel = {
-      url = "github:edtubbs/dpanel/update-stats-label";
+      url = "github:edtubbs/dpanel/update-stats-wrap";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
