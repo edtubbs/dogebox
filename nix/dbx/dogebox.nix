@@ -18,7 +18,7 @@ in
       ./dkm.nix
       ./dogeboxd.nix
     ]
-    ++ lib.optionals (builtins.pathExists dogeboxDataNixPath) [
+    ++ lib.optionals (builtins.pathExists "/opt/dogebox/nix/dogebox.nix") [
       dogeboxDataNixPath
     ]
     ++ lib.optionals (remoteRebuildTarget != "") [

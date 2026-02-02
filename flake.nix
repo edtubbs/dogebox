@@ -152,6 +152,7 @@ rec {
         # These are the built packages, rather than the raw sources.
         dkm = inputs.dkm.packages.${system}.default;
         dogeboxd = inputs.dogeboxd.packages.${system}.default;
+        dpanel = inputs.dpanel.packages.${system}.default;
 
         # Explicitly only pass the rk3588 firmware for the nanopc-t6 builder.
         nanopc-t6-rk3588-firmware = inputs.dogebox-nur-packages.legacyPackages.${system}.rk3588-firmware;
@@ -161,7 +162,7 @@ rec {
       # dogebox-wg/dev flake to allow easier development. There's things here
       # that are passed-in/available that our normal production flake doesn't use.
       mkNixosSystem =
-        { 
+        {
           system,
           builderType,
           devMode ? isOSDeveloperMode,
@@ -260,9 +261,9 @@ rec {
             nix build .#packages.${system}.${target} \
               -L \
               --print-out-paths \
-              --override-input dogeboxd "path:$(realpath ../dogeboxd)" \
-              --override-input dpanel "path:$(realpath ../dpanel)" \
-              --override-input dkm "path:$(realpath ../dkm)"
+              --override-input dogeboxd "path:$(realpath ../dogeboxd)?rev=$(git -C ../dogeboxd log -1 --pretty=format:%H)" \
+              --override-input dpanel "path:$(realpath ../dpanel)?rev=$(git -C ../dpanel log -1 --pretty=format:%H)" \
+              --override-input dkm "path:$(realpath ../dkm)?rev=$(git -C ../dkm log -1 --pretty=format:%H)"
 
             # This overrides the current OS lockfile, so explicitly git revert that.
             ${pkgs.git}/bin/git checkout -- flake.lock
@@ -307,9 +308,9 @@ rec {
               --use-remote-sudo \
               --fast \
               --impure \
-              --override-input dpanel "path:$(realpath ../dpanel)" \
-              --override-input dkm "path:$(realpath ../dkm)" \
-              --override-input dogeboxd "path:$(realpath ../dogeboxd)"
+              --override-input dogeboxd "path:$(realpath ../dogeboxd)?rev=$(git -C ../dogeboxd log -1 --pretty=format:%H)" \
+              --override-input dpanel "path:$(realpath ../dpanel)?rev=$(git -C ../dpanel log -1 --pretty=format:%H)" \
+              --override-input dkm "path:$(realpath ../dkm)?rev=$(git -C ../dkm log -1 --pretty=format:%H)"
           '';
         };
 
