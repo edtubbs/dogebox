@@ -24,7 +24,7 @@ rec {
       url = "github:dogebox-wg/dogeboxd";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
-      inputs.dpanel-src.follows = "dpanel";
+      inputs.dpanel.follows = "dpanel";
     };
 
     dkm = {
