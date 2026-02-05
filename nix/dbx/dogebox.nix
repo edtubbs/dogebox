@@ -2,8 +2,8 @@
 
 let
   remoteRebuildTarget = builtins.getEnv "REMOTE_REBUILD_DOGEBOX_DIRECTORY";
-  defaultDataPath = /opt/dogebox;
-  devDatapathFile = /etc/nixos-dev/datapath;
+  defaultDataPath = "/opt/dogebox";
+  devDatapathFile = "/etc/nixos-dev/datapath";
 
   dogeboxDataPath =
     if builtins.pathExists devDatapathFile
