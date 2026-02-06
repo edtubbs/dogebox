@@ -32,6 +32,20 @@ Documentation used for NixOS/Dogebox support:
   - CONFIG_VENDOR_FRIENDLYELEC=y
   - 'Zero memory on allocation'
 
+## Reset Button Support
+
+The NanoPC-T6 has a physical reset button that is connected to GPIO1_PC0. This button is configured in the device tree patch (`rk3588-nanopc-t6.dtsi.patch`) as follows:
+
+- **GPIO Pin**: GPIO1_PC0 (Bank 1, Port C, Pin 0)
+- **Key Code**: KEY_POWER
+- **Active Level**: LOW (button press pulls the pin low)
+- **Debounce**: 50ms
+- **Wakeup Source**: Yes (can wake the system from sleep)
+
+The kernel driver for GPIO keys (`CONFIG_KEYBOARD_GPIO=y`) is enabled in the defconfig, so the button should function as a power button when pressed.
+
+**Note**: The GPIO pin assignment was verified from the FriendlyARM kernel source (`nanopi6-v6.1.y` branch, `rk3588-nanopi6-rev02.dts`), which is the device tree variant that includes the button configuration. The standard NanoPC-T6 (rev01) in the FriendlyARM kernel did not have this button configured in their device tree, which is why it didn't work in their fork either until later revisions added it.
+
 ## Device peripheral firmware
 
 https://github.com/friendlyarm/sd-fuse_rk3588.git
