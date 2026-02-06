@@ -25,14 +25,14 @@
  };
  
  &combphy0_ps {
-@@ -808,6 +826,10 @@
- 			function = "pin_fun0";
- 		};
+@@ -790,6 +808,10 @@
+ 		vcc14-supply = <&vcc4v0_sys>;
+ 		vcca-supply = <&vcc4v0_sys>;
  
 +		pwrkey {
 +			status = "okay";
 +		};
 +
- 		regulators {
- 			vdd_gpu_s0: vdd_gpu_mem_s0: dcdc-reg1 {
- 				regulator-boot-on;
+ 		gpio-controller;
+ 		#gpio-cells = <2>;
+ 

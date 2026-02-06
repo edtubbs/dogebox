@@ -41,21 +41,30 @@ The NanoPC-T6 has a physical reset/power button that is **connected to the RK806
 - **Key Code**: KEY_POWER
 - **Kernel Config**: 
   - `CONFIG_INPUT_RK805_PWRKEY=y` 
-  - `CONFIG_MFD_RK806_SPI=y`
+  - `CONFIG_MFD_RK806_SPI=y` (FriendlyARM kernel variant)
 
 The button works by triggering interrupts (PWRON_FALL and PWRON_RISE) on the RK806 PMIC, which are handled by the kernel's rk805-pwrkey driver. This is the same mechanism used in U-Boot and the FriendlyARM kernel fork.
 
 ### Device Tree Configuration
 
-In the PMIC node (`&spi2 > pmic@0`), the pwrkey node is enabled:
+In the PMIC node (`&spi2 > pmic@0`), the pwrkey node is enabled immediately after the `vcca-supply` property and before the `gpio-controller` declaration:
 
 ```dts
+vcca-supply = <&vcc4v0_sys>;
+
 pwrkey {
     status = "okay";
 };
+
+gpio-controller;
+#gpio-cells = <2>;
 ```
 
 This enables the MFD driver to instantiate the power key device, which registers as a standard input device generating KEY_POWER events.
+
+**Important Note**: The pwrkey node must be placed in the correct location within the PMIC node structure. It should come after all supply declarations and before the gpio-controller/pinctrl sections.
+
+**Kernel Variant**: This system uses the FriendlyARM-based Rockchip kernel (`kernel_linux_latest_rockchip_stable`), which uses `rk806-core.c` MFD driver instead of mainline's `rk8xx-core.c`. The FriendlyARM driver checks for the pwrkey device tree node and requires it to be explicitly enabled with `status = "okay"`.
 
 **Previous Incorrect Approach**: Earlier attempts tried to configure the button as a GPIO key on GPIO1_PC0, but this was incorrect. The button is physically wired to the PMIC, not to a regular GPIO pin.
 
