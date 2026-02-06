@@ -1,9 +1,23 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
-@@ -224,6 +224,24 @@
+@@ -224,6 +224,43 @@
  		regulator-min-microvolt = <3300000>;
  		regulator-name = "vcc3v3_sd_s0";
  		vin-supply = <&vcc_3v3_s3>;
++	};
++
++	gpio-keys {
++		compatible = "gpio-keys";
++		pinctrl-names = "default";
++		pinctrl-0 = <&reset_button_pin>;
++
++		reset {
++			debounce-interval = <100>;
++			gpios = <&gpio0 RK_PB2 GPIO_ACTIVE_LOW>;
++			label = "reset";
++			linux,code = <KEY_POWER>;
++			wakeup-source;
++		};
 +	};
 +
 +	firmware {
@@ -26,3 +40,13 @@
  };
 
  &av1d_mmu {
++	status = "okay";
++};
++
++&pinctrl {
++	gpio-keys {
++		reset_button_pin: reset-button-pin {
++			rockchip,pins = <0 RK_PB2 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++};
