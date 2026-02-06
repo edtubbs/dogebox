@@ -1,23 +1,9 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
-@@ -225,6 +225,38 @@
+@@ -225,6 +225,24 @@
  		regulator-name = "vcc3v3_sd_s0";
  		vin-supply = <&vcc_3v3_s3>;
  	};
-+
-+	gpio-keys {
-+		compatible = "gpio-keys";
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&reset_button_pin>;
-+
-+		reset {
-+			debounce-interval = <50>;
-+			gpios = <&gpio1 RK_PC0 GPIO_ACTIVE_LOW>;
-+			label = "reset";
-+			linux,code = <KEY_POWER>;
-+			wakeup-source;
-+		};
-+	};
 +
 +	firmware {
 +		optee {
@@ -39,16 +25,14 @@
  };
  
  &combphy0_ps {
-@@ -630,6 +662,12 @@
- };
+@@ -808,6 +826,10 @@
+ 			function = "pin_fun0";
+ 		};
  
- &pinctrl {
-+	gpio-key {
-+		reset_button_pin: reset-button-pin {
-+			rockchip,pins = <1 RK_PC0 RK_FUNC_GPIO &pcfg_pull_up>;
++		pwrkey {
++			status = "okay";
 +		};
-+	};
 +
- 	gpio-leds {
- 		sys_led_pin: sys-led-pin {
- 			rockchip,pins = <2 RK_PB7 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		regulators {
+ 			vdd_gpu_s0: vdd_gpu_mem_s0: dcdc-reg1 {
+ 				regulator-boot-on;

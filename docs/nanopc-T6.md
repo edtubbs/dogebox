@@ -34,17 +34,30 @@ Documentation used for NixOS/Dogebox support:
 
 ## Reset Button Support
 
-The NanoPC-T6 has a physical reset button that is connected to GPIO1_PC0. This button is configured in the device tree patch (`rk3588-nanopc-t6.dtsi.patch`) as follows:
+The NanoPC-T6 has a physical reset/power button that is **connected to the RK806 PMIC's pwrkey input**, not to a GPIO pin. This button is configured in the device tree patch (`rk3588-nanopc-t6.dtsi.patch`) as follows:
 
-- **GPIO Pin**: GPIO1_PC0 (Bank 1, Port C, Pin 0)
+- **Connection**: RK806 PMIC pwrkey input
+- **Driver**: `rk805-pwrkey` (automatically instantiated by MFD driver)
 - **Key Code**: KEY_POWER
-- **Active Level**: LOW (button press pulls the pin low)
-- **Debounce**: 50ms
-- **Wakeup Source**: Yes (can wake the system from sleep)
+- **Kernel Config**: 
+  - `CONFIG_INPUT_RK805_PWRKEY=y` 
+  - `CONFIG_MFD_RK806_SPI=y`
 
-The kernel driver for GPIO keys (`CONFIG_KEYBOARD_GPIO=y`) is enabled in the defconfig, so the button should function as a power button when pressed.
+The button works by triggering interrupts (PWRON_FALL and PWRON_RISE) on the RK806 PMIC, which are handled by the kernel's rk805-pwrkey driver. This is the same mechanism used in U-Boot and the FriendlyARM kernel fork.
 
-**Note**: The GPIO pin assignment was verified from the FriendlyARM kernel source (`nanopi6-v6.1.y` branch, `rk3588-nanopi6-rev02.dts`). This is the device tree variant that includes the button configuration. The standard NanoPC-T6 (rev01) in the FriendlyARM kernel did not have this button configured, which is why it didn't work in their fork until later revisions added it.
+### Device Tree Configuration
+
+In the PMIC node (`&spi2 > pmic@0`), the pwrkey node is enabled:
+
+```dts
+pwrkey {
+    status = "okay";
+};
+```
+
+This enables the MFD driver to instantiate the power key device, which registers as a standard input device generating KEY_POWER events.
+
+**Previous Incorrect Approach**: Earlier attempts tried to configure the button as a GPIO key on GPIO1_PC0, but this was incorrect. The button is physically wired to the PMIC, not to a regular GPIO pin.
 
 ## Device peripheral firmware
 
