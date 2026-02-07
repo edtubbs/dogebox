@@ -47,22 +47,26 @@ The button works by triggering interrupts (PWRON_FALL and PWRON_RISE) on the RK8
 
 ### Device Tree Configuration
 
-In the PMIC node (`&spi2 > pmic@0`), the pwrkey node is enabled immediately after the `vcca-supply` property and before the `gpio-controller` declaration:
+In the PMIC node (`&spi2 > pmic@0`), the pwrkey node is enabled after the DVS pinctrl definitions and before the `regulators` block:
 
 ```dts
-vcca-supply = <&vcc4v0_sys>;
+rk806_dvs3_null: dvs3-null-pins {
+    pins = "gpio_pwrctrl3";
+    function = "pin_fun0";
+};
 
 pwrkey {
     status = "okay";
 };
 
-gpio-controller;
-#gpio-cells = <2>;
+regulators {
+    ...
+}
 ```
 
 This enables the MFD driver to instantiate the power key device, which registers as a standard input device generating KEY_POWER events.
 
-**Important Note**: The pwrkey node must be placed in the correct location within the PMIC node structure. It should come after all supply declarations and before the gpio-controller/pinctrl sections.
+**Important Note**: The pwrkey node placement matches the Rockchip kernel device tree structure, which differs from mainline Linux. It should come after the pinctrl definitions and before the regulators block in the Rockchip kernel.
 
 **Kernel Variant**: This system uses the FriendlyARM-based Rockchip kernel (`kernel_linux_latest_rockchip_stable`), which uses `rk806-core.c` MFD driver instead of mainline's `rk8xx-core.c`. The FriendlyARM driver checks for the pwrkey device tree node and requires it to be explicitly enabled with `status = "okay"`.
 
