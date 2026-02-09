@@ -56,7 +56,20 @@
   boot.loader.timeout = 1;
 
   boot.kernelPackages =
-    inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
+    let
+      # Add RK806 PMIC support to the rockchip kernel
+      baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
+    in
+    lib.mkForce (pkgs.linuxKernel.packagesFor (baseKernel.kernel.override {
+      structuredExtraConfig = with lib.kernel; {
+        # RK806 PMIC support (missing from nabam's config)
+        MFD_RK806 = yes;
+        MFD_RK806_SPI = yes;
+        PINCTRL_RK806 = yes;
+        REGULATOR_RK806 = yes;
+        INPUT_RK805_PWRKEY = yes;
+      };
+    }));
 
   boot.kernelPatches = [
     {
