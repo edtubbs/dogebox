@@ -1,6 +1,31 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
-@@ -808,6 +808,10 @@
+@@ -225,6 +225,24 @@
+ 		regulator-name = "vcc3v3_sd_s0";
+ 		vin-supply = <&vcc_3v3_s3>;
+ 	};
++
++	firmware {
++		optee {
++			compatible = "linaro,optee-tz";
++			method = "smc";
++		};
++	};
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		optee@30000000 {
++			reg = <0x0 0x30000000 0x0 0x2000000>;
++			no-map;
++		};
++	};
+ };
+ 
+ &combphy0_ps {
+@@ -808,6 +826,10 @@
  			function = "pin_fun0";
  		};
  
