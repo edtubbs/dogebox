@@ -63,11 +63,11 @@
     lib.mkForce (pkgs.linuxKernel.packagesFor (baseKernel.kernel.override {
       structuredExtraConfig = with lib.kernel; {
         # RK806 PMIC support (missing from nabam's config)
-        MFD_RK806 = yes;
-        MFD_RK806_SPI = yes;
-        PINCTRL_RK806 = yes;
-        REGULATOR_RK806 = yes;
-        INPUT_RK805_PWRKEY = yes;
+        # Using mainline kernel config option names for Linux 6.18+
+        MFD_RK8XX_SPI = yes;      # RK806 MFD driver via SPI
+        REGULATOR_RK808 = yes;    # Regulators for RK805/808/809/817/818 (includes RK806)
+        PINCTRL_RK805 = yes;      # Pinctrl for RK8XX family
+        INPUT_RK805_PWRKEY = yes; # Power key input driver
       };
     }));
 
