@@ -43,11 +43,12 @@
     })
   ];
 
-  # Show everything in the tty console instead of serial.
-  # Ideally we'd use `ttyFIQ0` which is a special debug serial on the rk3588,
-  # however, the mainline kernel did not seem to have this implemented as of
-  # 2025-12-08 so we're forced to use a different console.
-  boot.kernelParams = [ "console=tty1" ];
+  # Enable both video and serial console output.
+  # The rk3588 debug UART (UART2) is accessible via the USB-C debug port.
+  # In the FriendlyARM kernel this appears as `ttyFIQ0`, but the mainline
+  # kernel uses the standard 8250 serial driver instead, exposing it as
+  # `ttyS2`. The last console= entry becomes the primary /dev/console.
+  boot.kernelParams = [ "console=tty1" "console=ttyS2,1500000" ];
 
   # Use the extlinux boot loader. (NixOS wants to enable GRUB by default)
   boot.loader.grub.enable = false;
