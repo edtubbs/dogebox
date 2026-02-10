@@ -1,38 +1,38 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
-@@ -5,6 +5,30 @@
- / {
- model = "FriendlyElec NanoPC-T6";
- compatible = "friendlyarm,nanopc-t6", "rockchip,rk3588";
-+
-+firmware {
-+optee: optee {
-+compatible = "linaro,optee-tz";
-+method = "smc";
-+};
-+};
-+
-+reserved-memory {
-+#address-cells = <2>;
-+#size-cells = <2>;
-+ranges;
-+
-+optee@30000000 {
-+reg = <0x0 0x30000000 0x0 0x8000000>;
-+no-map;
-+};
-+};
- };
+@@ -6,6 +6,30 @@
+ 	model = "FriendlyElec NanoPC-T6";
+ 	compatible = "friendlyarm,nanopc-t6", "rockchip,rk3588";
  
- &combphy0_ps {
-@@ -787,6 +811,11 @@
- vcc14-supply = <&vcc_1v1_nldo_s3>;
- vcca-supply = <&vcc4v0_sys>;
- 
-+pwrkey {
-+status = "okay";
-+};
++	firmware {
++		optee: optee {
++			compatible = "linaro,optee-tz";
++			method = "smc";
++		};
++	};
 +
- gpio-controller;
- #gpio-cells = <2>;
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		optee@30000000 {
++			reg = <0x0 0x30000000 0x0 0x8000000>;
++			no-map;
++		};
++	};
+ 	aliases {
+ 		mmc0 = &sdhci;
+ 		mmc1 = &sdmmc;
+@@ -790,6 +814,11 @@
+ 	vcca-supply = <&vcc4v0_sys>;
  
+ 	gpio-controller;
++
++	pwrkey {
++		status = "okay";
++	};
++
+ 	#gpio-cells = <2>;
+ 
+ 	rk806_dvs1_null: dvs1-null-pins {
