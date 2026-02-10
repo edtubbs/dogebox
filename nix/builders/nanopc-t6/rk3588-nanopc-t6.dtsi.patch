@@ -1,30 +1,6 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
-@@ -6,6 +6,24 @@
- 	compatible = "friendlyarm,nanopc-t6", "rockchip,rk3588";
- 
-+	firmware {
-+		optee: optee {
-+			compatible = "linaro,optee-tz";
-+			method = "smc";
-+		};
-+	};
-+
-+	reserved-memory {
-+		#address-cells = <2>;
-+		#size-cells = <2>;
-+		ranges;
-+
-+		optee@30000000 {
-+			reg = <0x0 0x30000000 0x0 0x10000000>;
-+			no-map;
-+		};
-+	};
-+
- 	aliases {
- 		mmc0 = &sdmmc;
- 		mmc1 = &sdio;
-@@ -793,6 +811,9 @@
+@@ -793,6 +793,9 @@
  		gpio-controller;
 +		pwrkey {
 +			status = "okay";
