@@ -56,16 +56,29 @@
   boot.loader.timeout = 1;
 
   boot.kernelPackages =
-    inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
+    let
+      # Use nabam's mainline-based rockchip kernel
+      baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
+      
+      # Override with mainline RK8XX config options for RK806 PMIC support
+      customKernel = baseKernel.kernel.override {
+        structuredExtraConfig = with lib.kernel; {
+          # Mainline kernel RK8XX drivers (supports RK806)
+          MFD_RK8XX_SPI = yes;        # MFD driver for RK806 via SPI
+          REGULATOR_RK808 = yes;      # Regulator driver (covers RK806)
+          PINCTRL_RK805 = yes;        # Pinctrl driver (covers RK806)
+          INPUT_RK805_PWRKEY = yes;   # Power key input driver
+        };
+      };
+    in
+    lib.mkForce (pkgs.linuxPackagesFor customKernel);
 
-  # Device tree patches commented out to avoid kernel rebuild
-  # Kernel rebuild takes 1.5+ hours in CI and causes failures
-  # boot.kernelPatches = [
-  #   {
-  #     name = "rk3588-nanopc-t6.dtsi.patch";
-  #     patch = ./rk3588-nanopc-t6.dtsi.patch;
-  #   }
-  # ];
+  boot.kernelPatches = [
+    {
+      name = "rk3588-nanopc-t6.dtsi.patch";
+      patch = ./rk3588-nanopc-t6.dtsi.patch;
+    }
+  ];
 
 
   boot.initrd.availableKernelModules = [

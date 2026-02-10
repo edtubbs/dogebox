@@ -25,14 +25,15 @@
  };
  
  &combphy0_ps {
-@@ -790,6 +808,10 @@
+@@ -790,6 +808,14 @@
  		vcc14-supply = <&vcc_1v1_nldo_s3>;
  		vcca-supply = <&vcc4v0_sys>;
+ 
+ 		gpio-controller;
+ 		#gpio-cells = <2>;
  
 +		pwrkey {
 +			status = "okay";
 +		};
 +
- 		gpio-controller;
- 		#gpio-cells = <2>;
  
