@@ -24,15 +24,13 @@
  	aliases {
  		mmc0 = &sdhci;
  		mmc1 = &sdmmc;
-@@ -790,6 +807,11 @@
+@@ -790,6 +807,9 @@
  	vcca-supply = <&vcc4v0_sys>;
  
  	gpio-controller;
-+
 +	pwrkey {
 +		status = "okay";
 +	};
-+
  	#gpio-cells = <2>;
  
  	rk806_dvs1_null: dvs1-null-pins {
