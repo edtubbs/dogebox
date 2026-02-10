@@ -1,42 +1,40 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
 @@ -225,6 +225,24 @@
- 		regulator-name = "vcc3v3_sd_s0";
- 		vin-supply = <&vcc_3v3_s3>;
- 	};
+ regulator-name = "vcc3v3_sd_s0";
+ vin-supply = <&vcc_3v3_s3>;
+ };
 +
-+	firmware {
-+		optee {
-+			compatible = "linaro,optee-tz";
-+			method = "smc";
-+		};
-+	};
++firmware {
++optee {
++compatible = "linaro,optee-tz";
++method = "smc";
++};
++};
 +
-+	reserved-memory {
-+		#address-cells = <2>;
-+		#size-cells = <2>;
-+		ranges;
++reserved-memory {
++#address-cells = <2>;
++#size-cells = <2>;
++ranges;
 +
-+		optee@30000000 {
-+			reg = <0x0 0x30000000 0x0 0x2000000>;
-+			no-map;
-+		};
-+	};
++optee@30000000 {
++reg = <0x0 0x30000000 0x0 0x2000000>;
++no-map;
++};
++};
  };
  
  &combphy0_ps {
 @@ -790,6 +808,14 @@
- 		vcc14-supply = <&vcc_1v1_nldo_s3>;
- 		vcca-supply = <&vcc4v0_sys>;
+ vcc14-supply = <&vcc4v0_sys>;
  
- 		gpio-controller;
- 		#gpio-cells = <2>;
+ gpio-controller;
+ #gpio-cells = <2>;
  
-+		pwrkey {
-+			status = "okay";
-+		};
++pwrkey {
++status = "okay";
++};
 +
- 		rk806_dvs1_null: dvs1-null-pins {
- 			pins = "gpio_pwrctrl1";
- 			function = "pin_fun0";
-
+ rk806_dvs1_null: dvs1-null-pins {
+ pins = "gpio_pwrctrl1";
+ function = "pin_fun0";
