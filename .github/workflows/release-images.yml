@@ -110,7 +110,8 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
       - name: Build Dogebox OS T6
         run: |
-          nix build .#packages.aarch64-linux.t6 -o result-t6
+          nix flake update 
+          nix build .#packages.aarch64-linux.t6 -o result-t6 --print-build-logs
           echo "Copying artefacts"
           mkdir -p artifacts
           cp ./result-t6/*.img artifacts/
