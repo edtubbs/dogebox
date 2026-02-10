@@ -56,20 +56,7 @@
   boot.loader.timeout = 1;
 
   boot.kernelPackages =
-    let
-      # Add RK806 PMIC support to the rockchip kernel
-      baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
-    in
-    lib.mkForce (pkgs.linuxKernel.packagesFor (baseKernel.kernel.override {
-      structuredExtraConfig = with lib.kernel; {
-        # RK806 PMIC support (missing from nabam's config)
-        # Using mainline kernel config option names for Linux 6.18+
-        MFD_RK8XX_SPI = yes;      # RK806 MFD driver via SPI
-        REGULATOR_RK808 = yes;    # Regulators for RK805/808/809/817/818 (includes RK806)
-        PINCTRL_RK805 = yes;      # Pinctrl for RK8XX family
-        INPUT_RK805_PWRKEY = yes; # Power key input driver
-      };
-    }));
+    inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
 
   boot.kernelPatches = [
     {
@@ -87,6 +74,10 @@
     "rtw88_8822ce"
     "rtw88_pci"
     "rtw88_core"
+    # RK806 PMIC support modules
+    "rk808"          # RK8xx MFD core and regulators
+    "rk808_regulator"
+    "rk805_pwrkey"   # Power key input driver
   ];
 
   boot.extraModulePackages =
