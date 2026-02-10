@@ -111,7 +111,7 @@ jobs:
       - name: Build Dogebox OS T6
         run: |
           nix flake update 
-          nix build .#packages.aarch64-linux.t6 -o result-t6 --print-log-files
+          nix build .#packages.aarch64-linux.t6 -o result-t6 --print-build-logs
           echo "Copying artefacts"
           mkdir -p artifacts
           cp ./result-t6/*.img artifacts/
