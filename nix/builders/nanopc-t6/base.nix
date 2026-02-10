@@ -43,12 +43,16 @@
     })
   ];
 
-  # Enable both video and serial console output.
+  # Enable both video and serial console output via the Rockchip FIQ debugger.
   # The rk3588 debug UART (UART2) is accessible via the USB-C debug port.
-  # In the FriendlyARM kernel this appears as `ttyFIQ0`, but the mainline
-  # kernel uses the standard 8250 serial driver instead, exposing it as
-  # `ttyS2`. The last console= entry becomes the primary /dev/console.
-  boot.kernelParams = [ "console=tty1" "console=ttyS2,1500000" ];
+  # The FriendlyARM kernel provides this as `ttyFIQ0` using the Rockchip FIQ
+  # debugger driver (backported below). The earlycon parameter provides serial
+  # output during early boot before the FIQ debugger driver loads.
+  boot.kernelParams = [
+    "earlycon=uart8250,mmio32,0xfeb50000"
+    "console=ttyFIQ0"
+    "console=tty1"
+  ];
 
   # Use the extlinux boot loader. (NixOS wants to enable GRUB by default)
   boot.loader.grub.enable = false;
@@ -63,6 +67,23 @@
     {
       name = "rk3588-nanopc-t6.dtsi.patch";
       patch = ./rk3588-nanopc-t6.dtsi.patch;
+    }
+    {
+      # Backport the Rockchip FIQ debugger driver from the vendor kernel
+      # (armbian/linux-rockchip rk-6.1-rkr5.1). This creates the ttyFIQ0
+      # serial console device used by FriendlyARM kernels. Compiled without
+      # CONFIG_FIQ_DEBUGGER_TRUST_ZONE to avoid dependency on Rockchip SIP
+      # calls; uses standard IRQ mode instead.
+      name = "rockchip-fiq-debugger";
+      patch = ./rockchip-fiq-debugger.patch;
+      extraStructuredConfig = with lib.kernel; {
+        FIQ_DEBUGGER = yes;
+        FIQ_DEBUGGER_NO_SLEEP = yes;
+        FIQ_DEBUGGER_CONSOLE = yes;
+        FIQ_DEBUGGER_CONSOLE_DEFAULT_ENABLE = yes;
+        RK_CONSOLE_THREAD = yes;
+        ROCKCHIP_FIQ_DEBUGGER = yes;
+      };
     }
   ];
 
