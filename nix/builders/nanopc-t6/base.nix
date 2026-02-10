@@ -58,12 +58,15 @@
   boot.kernelPackages =
     inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
 
-  boot.kernelPatches = [
-    {
-      name = "rk3588-nanopc-t6.dtsi.patch";
-      patch = ./rk3588-nanopc-t6.dtsi.patch;
-    }
-  ];
+  # Device tree patches commented out to avoid kernel rebuild
+  # Kernel rebuild takes 1.5+ hours in CI and causes failures
+  # boot.kernelPatches = [
+  #   {
+  #     name = "rk3588-nanopc-t6.dtsi.patch";
+  #     patch = ./rk3588-nanopc-t6.dtsi.patch;
+  #   }
+  # ];
+
 
   boot.initrd.availableKernelModules = [
     "nvme"
