@@ -57,18 +57,21 @@
 
   boot.kernelPackages =
     let
-      # Use FriendlyARM rockchip kernel source but with our custom defconfig
-      rockchipKernelSrc = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable.kernel.src;
+      # Use nabam's mainline-based rockchip kernel
+      baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
       
-      # Build kernel with our defconfig that has RK806 PMIC support
-      customKernel = pkgs.linuxManualConfig {
-        version = "6.1.43-rockchip";
-        src = rockchipKernelSrc;
-        configfile = ./nanopc-T6_linux_defconfig;
-        allowImportFromDerivation = true;
+      # Override with mainline RK8XX config options for RK806 PMIC support
+      customKernel = baseKernel.kernel.override {
+        structuredExtraConfig = with lib.kernel; {
+          # Mainline kernel RK8XX drivers (supports RK806)
+          MFD_RK8XX_SPI = yes;        # MFD driver for RK806 via SPI
+          REGULATOR_RK808 = yes;      # Regulator driver (covers RK806)
+          PINCTRL_RK805 = yes;        # Pinctrl driver (covers RK806)
+          INPUT_RK805_PWRKEY = yes;   # Power key input driver
+        };
       };
     in
-    pkgs.linuxPackagesFor customKernel;
+    lib.mkForce (pkgs.linuxPackagesFor customKernel);
 
   boot.kernelPatches = [
     {
