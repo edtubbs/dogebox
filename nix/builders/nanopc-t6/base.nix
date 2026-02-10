@@ -56,7 +56,24 @@
   boot.loader.timeout = 1;
 
   boot.kernelPackages =
-    inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
+    let
+      baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
+      customKernel = baseKernel.kernel.override {
+        structuredExtraConfig = with lib.kernel; {
+          # RK806 PMIC support - FriendlyARM kernel specific options
+          MFD_RK806 = yes;
+          MFD_RK806_SPI = yes;
+          PINCTRL_RK806 = yes;
+          REGULATOR_RK806 = yes;
+          INPUT_RK805_PWRKEY = yes;
+          # Also ensure RK808 support for compatibility
+          MFD_RK808 = yes;
+          REGULATOR_RK808 = yes;
+          PINCTRL_RK805 = yes;
+        };
+      };
+    in
+    lib.mkForce (pkgs.linuxKernel.packagesFor customKernel);
 
   boot.kernelPatches = [
     {
@@ -74,10 +91,6 @@
     "rtw88_8822ce"
     "rtw88_pci"
     "rtw88_core"
-    # RK806 PMIC support modules
-    "rk808"          # RK8xx MFD core and regulators
-    "rk808_regulator"
-    "rk805_pwrkey"   # Power key input driver
   ];
 
   boot.extraModulePackages =
