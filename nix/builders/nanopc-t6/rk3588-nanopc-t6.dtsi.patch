@@ -1,6 +1,6 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
-@@ -224,6 +224,37 @@
+@@ -224,7 +224,37 @@
  		regulator-min-microvolt = <3300000>;
  		regulator-name = "vcc3v3_sd_s0";
  		vin-supply = <&vcc_3v3_s3>;
@@ -38,7 +38,7 @@
  };
  
  &av1d_mmu {
-@@ -770,7 +801,7 @@
+@@ -770,7 +800,7 @@
  
  &uart2 {
  	pinctrl-0 = <&uart2m0_xfer>;
