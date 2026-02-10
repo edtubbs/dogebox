@@ -1,12 +1,10 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
-@@ -790,6 +790,9 @@
- 	vcca-supply = <&vcc4v0_sys>;
+@@ -793,6 +793,9 @@
+ 		gpio-controller;
++		pwrkey {
++			status = "okay";
++		};
+ 		#gpio-cells = <2>;
  
- 	gpio-controller;
-+	pwrkey {
-+		status = "okay";
-+	};
- 	#gpio-cells = <2>;
- 
- 	rk806_dvs1_null: dvs1-null-pins {
+ 		rk806_dvs1_null: dvs1-null-pins {
