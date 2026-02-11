@@ -47,7 +47,8 @@
   # The rk3588 debug UART (UART2) is accessible via the USB-C debug port
   # and appears as ttyS2 via the mainline 8250/DW serial driver.
   # earlycon provides serial output during early boot before the full
-  # UART driver loads; keep_bootcon retains it until ttyS2 takes over.
+  # UART driver loads; keep_bootcon keeps earlycon active alongside the
+  # real console so no output is lost during the transition.
   boot.kernelParams = [
     "earlycon=uart8250,mmio32,0xfeb50000"
     "keep_bootcon"
