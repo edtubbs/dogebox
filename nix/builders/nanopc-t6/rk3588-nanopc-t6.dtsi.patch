@@ -1,21 +1,9 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dtsi
-@@ -224,7 +224,37 @@
+@@ -224,6 +224,24 @@
  		regulator-min-microvolt = <3300000>;
  		regulator-name = "vcc3v3_sd_s0";
  		vin-supply = <&vcc_3v3_s3>;
-+	};
-+
-+	fiq_debugger: fiq-debugger {
-+		compatible = "rockchip,fiq-debugger";
-+		rockchip,serial-id = <2>;
-+		rockchip,wake-irq = <0>;
-+		rockchip,irq-mode-enable = <1>;
-+		rockchip,baudrate = <1500000>;
-+		interrupts = <GIC_SPI 423 IRQ_TYPE_LEVEL_LOW>;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&uart2m0_xfer>;
-+		status = "okay";
 +	};
 +
 +	firmware {
@@ -38,12 +26,3 @@
  };
  
  &av1d_mmu {
-@@ -770,7 +800,7 @@
- 
- &uart2 {
- 	pinctrl-0 = <&uart2m0_xfer>;
--	status = "okay";
-+	status = "disabled";
- };
- 
- &u2phy0 {
