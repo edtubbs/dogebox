@@ -55,16 +55,18 @@
   boot.loader.generic-extlinux-compatible.enable = true;
   boot.loader.timeout = 1;
 
-  # The NanoPC-T6 power/reset button is connected to the RK806 PMIC pwrkey input.
-  # The mainline kernel rk8xx-core MFD driver automatically creates a rk805-pwrkey
-  # platform device that generates KEY_POWER events on button press/release.
-  # Configure systemd-logind to reboot on short press (default is poweroff,
-  # which on a headless device silently shuts down instead of rebooting).
-  # Long press (~5s) triggers poweroff for intentional shutdown.
-  services.logind.settings.Login = {
-    HandlePowerKey = "reboot";
-    HandlePowerKeyLongPress = "poweroff";
-  };
+  # NanoPC-T6 has three physical buttons:
+  #
+  # 1. Power button (PWRON) — connected to RK806 PMIC pwrkey input.
+  #    Generates KEY_POWER via rk805-pwrkey driver. Handled by systemd-logind.
+  #    Default NixOS behavior: short press = poweroff, which is correct.
+  #
+  # 2. Reset button (RESETB) — connected to RK806 PMIC RESETB pin.
+  #    Hardware-level reset, bypasses kernel entirely. Configured via
+  #    rockchip,reset-mode device tree property (see rk3588-nanopc-t6.dtsi.patch).
+  #
+  # 3. Mask ROM button — connected to SARADC channel 0.
+  #    Used for entering Mask ROM/recovery mode during boot.
 
   boot.kernelPackages =
     let

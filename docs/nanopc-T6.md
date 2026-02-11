@@ -32,18 +32,19 @@ Documentation used for NixOS/Dogebox support:
   - CONFIG_VENDOR_FRIENDLYELEC=y
   - 'Zero memory on allocation'
 
-## Reset Button Support
+## Buttons
 
-The NanoPC-T6 has a physical power/reset button connected to the **RK806 PMIC's pwrkey input** (not to a GPIO pin).
+The NanoPC-T6 has **three distinct physical buttons** with different hardware connections and behaviors:
 
-### How It Works
+### 1. Power Button (PWRON)
 
-1. **Hardware**: Button press triggers the RK806 PMIC's PWRON interrupt lines (PWRON_FALL on press, PWRON_RISE on release)
-2. **Kernel**: The mainline `rk8xx-core.c` MFD driver automatically registers an `rk805-pwrkey` platform device for RK806 PMICs — no device tree `pwrkey` node is needed
-3. **Input**: The `rk805-pwrkey` driver generates `KEY_POWER` input events
-4. **Userspace**: `systemd-logind` handles `KEY_POWER` events according to `HandlePowerKey` configuration
+- **Hardware**: Connected to the RK806 PMIC's **PWRON** input pin
+- **Mechanism**: PMIC-level power control with interrupt notification to kernel
+- **Kernel driver**: `rk805-pwrkey` (auto-created by mainline `rk8xx-core.c` MFD driver — no device tree `pwrkey` node needed)
+- **Input event**: `KEY_POWER`
+- **Behavior**: Handled by `systemd-logind` (`HandlePowerKey`). NixOS default is `poweroff`.
 
-### Kernel Configuration
+#### Kernel Configuration
 
 The following kernel config options are required (added via `structuredExtraConfig` since nabam's kernel doesn't include them):
 
@@ -53,30 +54,42 @@ The following kernel config options are required (added via `structuredExtraConf
 
 These are **mainline kernel** config names. The FriendlyARM vendor kernel (v6.1.y) uses different names (`CONFIG_MFD_RK806_SPI`, etc.) — do not confuse them.
 
-### systemd-logind Configuration
+### 2. Reset Button (RESETB)
 
-The power key behavior is configured in `base.nix`:
+- **Hardware**: Connected to the RK806 PMIC's **RESETB** input pin
+- **Mechanism**: Pure hardware reset — asserts RESETB low, which triggers the PMIC's reset function. **Bypasses the kernel entirely** (no software event, no clean shutdown)
+- **Kernel driver**: None — handled at PMIC hardware level
+- **Input event**: None
+- **Behavior**: Configured by the `rockchip,reset-mode` device tree property on the RK806 PMIC node:
+  - Mode 0: Restart PMU (full power cycle, regulators briefly interrupted)
+  - Mode 1: Reset all power off registers, force state to ACTIVE mode
+  - Mode 2: Same as mode 1, also pulls RESETB pin down for 5ms
 
-- **Short press**: `HandlePowerKey=reboot` — triggers a clean reboot
-- **Long press**: `HandlePowerKeyLongPress=poweroff` — triggers a clean shutdown
+The device tree patch sets `rockchip,reset-mode = <1>` to match the FriendlyARM vendor kernel behavior (`pmic-reset-func = <1>`). Without this property, the PMIC uses its hardware default. The mainline kernel's `rk8xx-core.c` reads this property during probe and writes it to `RK806_SYS_CFG3`.
 
-Without explicit configuration, NixOS defaults `HandlePowerKey` to `poweroff`, which on a headless device silently shuts down instead of rebooting.
+### 3. Mask ROM Button (SARADC)
+
+- **Hardware**: Connected to **SARADC channel 0** via voltage divider
+- **Mechanism**: ADC-based key detection (reads analog voltage level)
+- **Kernel driver**: `adc-keys` (already in mainline DTS as `adc-keys-0` node)
+- **Input event**: `KEY_SETUP` (Mask Rom)
+- **Behavior**: Used for entering Mask ROM/recovery mode when held during power-on. In U-Boot, detected via `CONFIG_BUTTON_ADC`.
 
 ### Important: Mainline vs FriendlyARM Vendor Kernel
 
 This system uses `nabam/nixos-rockchip`'s `kernel_linux_latest_rockchip_stable`, which is the **mainline Linux kernel** with Rockchip-specific config options. It is NOT the FriendlyARM vendor kernel (v6.1.y).
 
-Key differences for pwrkey:
-- **Mainline kernel**: `rk8xx-core.c` unconditionally creates pwrkey MFD cell for RK806 — no DT node needed
-- **FriendlyARM kernel**: `rk806-core.c` requires an explicit `pwrkey { status = "okay"; }` DT node
+Key differences:
+- **Mainline kernel**: `rk8xx-core.c` unconditionally creates pwrkey MFD cell for RK806. Reset mode configured via `rockchip,reset-mode` DT property.
+- **FriendlyARM kernel**: `rk806-core.c` requires an explicit `pwrkey { status = "okay"; }` DT node. Reset mode configured via `pmic-reset-func` DT property.
 
-The device tree patch should NOT include a `pwrkey` node — it would be ignored by the mainline driver and could cause DT validation warnings.
-
-### Previous Incorrect Approach
+### Previous Incorrect Approaches
 
 Earlier attempts tried:
-1. Configuring the button as a GPIO key (GPIO1_PC0) — incorrect, button is wired to PMIC
-2. Adding `pwrkey { status = "okay"; }` DT node — only works with FriendlyARM vendor kernel, not mainline
+1. Configuring the reset button as a GPIO key (GPIO1_PC0) — incorrect, reset is wired to PMIC RESETB
+2. Adding `pwrkey { status = "okay"; }` DT node — only works with FriendlyARM vendor kernel
+3. Treating the power button and reset button as the same button — they are separate hardware
+4. Configuring `HandlePowerKey=reboot` in systemd-logind — this changes the power button behavior, not the reset button which is hardware-only
 
 ## Device peripheral firmware
 

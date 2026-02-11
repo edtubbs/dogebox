@@ -24,3 +24,18 @@
 +		};
  	};
  };
+ 
+@@ -809,6 +827,13 @@
+ 
+ 		system-power-controller;
+ 
++		/*
++		 * Configure PMIC reset behavior when RESETB pin is asserted
++		 * (physical reset button). Mode 1: reset all power off registers,
++		 * force state to ACTIVE mode (matches FriendlyARM pmic-reset-func=1).
++		 */
++		rockchip,reset-mode = <1>;
++
+ 		vcc1-supply = <&vcc4v0_sys>;
+ 		vcc2-supply = <&vcc4v0_sys>;
+ 		vcc3-supply = <&vcc4v0_sys>;
