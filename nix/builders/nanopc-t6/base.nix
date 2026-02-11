@@ -58,8 +58,9 @@
   # The NanoPC-T6 power/reset button is connected to the RK806 PMIC pwrkey input.
   # The mainline kernel rk8xx-core MFD driver automatically creates a rk805-pwrkey
   # platform device that generates KEY_POWER events on button press/release.
-  # Configure systemd-logind to reboot on power key press (default is poweroff,
+  # Configure systemd-logind to reboot on short press (default is poweroff,
   # which on a headless device silently shuts down instead of rebooting).
+  # Long press (~5s) triggers poweroff for intentional shutdown.
   services.logind.settings.Login = {
     HandlePowerKey = "reboot";
     HandlePowerKeyLongPress = "poweroff";
