@@ -27,9 +27,9 @@
  
 @@ -793,6 +811,9 @@
  		gpio-controller;
+ 		#gpio-cells = <2>;
 +		pwrkey {
 +			status = "okay";
 +		};
- 		#gpio-cells = <2>;
  
  		rk806_dvs1_null: dvs1-null-pins {
