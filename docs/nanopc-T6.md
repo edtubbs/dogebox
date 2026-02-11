@@ -34,43 +34,49 @@ Documentation used for NixOS/Dogebox support:
 
 ## Reset Button Support
 
-The NanoPC-T6 has a physical reset/power button that is **connected to the RK806 PMIC's pwrkey input**, not to a GPIO pin. This button is configured in the device tree patch (`rk3588-nanopc-t6.dtsi.patch`) as follows:
+The NanoPC-T6 has a physical power/reset button connected to the **RK806 PMIC's pwrkey input** (not to a GPIO pin).
 
-- **Connection**: RK806 PMIC pwrkey input
-- **Driver**: `rk805-pwrkey` (automatically instantiated by MFD driver)
-- **Key Code**: KEY_POWER
-- **Kernel Config**: 
-  - `CONFIG_INPUT_RK805_PWRKEY=y` 
-  - `CONFIG_MFD_RK806_SPI=y` (FriendlyARM kernel variant)
+### How It Works
 
-The button works by triggering interrupts (PWRON_FALL and PWRON_RISE) on the RK806 PMIC, which are handled by the kernel's rk805-pwrkey driver. This is the same mechanism used in U-Boot and the FriendlyARM kernel fork.
+1. **Hardware**: Button press triggers the RK806 PMIC's PWRON interrupt lines (PWRON_FALL on press, PWRON_RISE on release)
+2. **Kernel**: The mainline `rk8xx-core.c` MFD driver automatically registers an `rk805-pwrkey` platform device for RK806 PMICs — no device tree `pwrkey` node is needed
+3. **Input**: The `rk805-pwrkey` driver generates `KEY_POWER` input events
+4. **Userspace**: `systemd-logind` handles `KEY_POWER` events according to `HandlePowerKey` configuration
 
-### Device Tree Configuration
+### Kernel Configuration
 
-In the PMIC node (`&spi2 > pmic@0`), the pwrkey node is enabled after the DVS pinctrl definitions and before the `regulators` block:
+The following kernel config options are required (added via `structuredExtraConfig` since nabam's kernel doesn't include them):
 
-```dts
-rk806_dvs3_null: dvs3-null-pins {
-    pins = "gpio_pwrctrl3";
-    function = "pin_fun0";
-};
+- `CONFIG_MFD_RK8XX_SPI=y` — RK806 PMIC MFD driver via SPI bus
+- `CONFIG_INPUT_RK805_PWRKEY=y` — Power key input driver for RK8XX PMICs
+- `CONFIG_PINCTRL_RK805=y` — RK8XX family pinctrl driver
 
-pwrkey {
-    status = "okay";
-};
+These are **mainline kernel** config names. The FriendlyARM vendor kernel (v6.1.y) uses different names (`CONFIG_MFD_RK806_SPI`, etc.) — do not confuse them.
 
-regulators {
-    ...
-}
-```
+### systemd-logind Configuration
 
-This enables the MFD driver to instantiate the power key device, which registers as a standard input device generating KEY_POWER events.
+The power key behavior is configured in `base.nix`:
 
-**Important Note**: The pwrkey node placement matches the Rockchip kernel device tree structure, which differs from mainline Linux. It should come after the pinctrl definitions and before the regulators block in the Rockchip kernel.
+- **Short press**: `HandlePowerKey=reboot` — triggers a clean reboot
+- **Long press**: `HandlePowerKeyLongPress=poweroff` — triggers a clean shutdown
 
-**Kernel Variant**: This system uses the FriendlyARM-based Rockchip kernel (`kernel_linux_latest_rockchip_stable`), which uses `rk806-core.c` MFD driver instead of mainline's `rk8xx-core.c`. The FriendlyARM driver checks for the pwrkey device tree node and requires it to be explicitly enabled with `status = "okay"`.
+Without explicit configuration, NixOS defaults `HandlePowerKey` to `poweroff`, which on a headless device silently shuts down instead of rebooting.
 
-**Previous Incorrect Approach**: Earlier attempts tried to configure the button as a GPIO key on GPIO1_PC0, but this was incorrect. The button is physically wired to the PMIC, not to a regular GPIO pin.
+### Important: Mainline vs FriendlyARM Vendor Kernel
+
+This system uses `nabam/nixos-rockchip`'s `kernel_linux_latest_rockchip_stable`, which is the **mainline Linux kernel** with Rockchip-specific config options. It is NOT the FriendlyARM vendor kernel (v6.1.y).
+
+Key differences for pwrkey:
+- **Mainline kernel**: `rk8xx-core.c` unconditionally creates pwrkey MFD cell for RK806 — no DT node needed
+- **FriendlyARM kernel**: `rk806-core.c` requires an explicit `pwrkey { status = "okay"; }` DT node
+
+The device tree patch should NOT include a `pwrkey` node — it would be ignored by the mainline driver and could cause DT validation warnings.
+
+### Previous Incorrect Approach
+
+Earlier attempts tried:
+1. Configuring the button as a GPIO key (GPIO1_PC0) — incorrect, button is wired to PMIC
+2. Adding `pwrkey { status = "okay"; }` DT node — only works with FriendlyARM vendor kernel, not mainline
 
 ## Device peripheral firmware
 

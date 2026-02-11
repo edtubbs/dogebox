@@ -55,19 +55,28 @@
   boot.loader.generic-extlinux-compatible.enable = true;
   boot.loader.timeout = 1;
 
+  # The NanoPC-T6 power/reset button is connected to the RK806 PMIC pwrkey input.
+  # The mainline kernel rk8xx-core MFD driver automatically creates a rk805-pwrkey
+  # platform device that generates KEY_POWER events on button press/release.
+  # Configure systemd-logind to reboot on power key press (default is poweroff,
+  # which on a headless device silently shuts down instead of rebooting).
+  services.logind.settings.Login = {
+    HandlePowerKey = "reboot";
+    HandlePowerKeyLongPress = "poweroff";
+  };
+
   boot.kernelPackages =
     let
-      # Use nabam's mainline-based rockchip kernel
+      # Use nabam's mainline-based rockchip kernel (linux_latest with rockchip config).
+      # nabam's config includes REGULATOR_RK808, GPIO_ROCKCHIP, PINCTRL_ROCKCHIP, SPI_ROCKCHIP
+      # but is missing the RK8XX MFD SPI driver and pwrkey input driver needed for the
+      # RK806 PMIC on the NanoPC-T6.
       baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
-      
-      # Override with mainline RK8XX config options for RK806 PMIC support
       customKernel = baseKernel.kernel.override {
         structuredExtraConfig = with lib.kernel; {
-          # Mainline kernel RK8XX drivers (supports RK806)
-          MFD_RK8XX_SPI = yes;        # MFD driver for RK806 via SPI
-          REGULATOR_RK808 = yes;      # Regulator driver (covers RK806)
-          PINCTRL_RK805 = yes;        # Pinctrl driver (covers RK806)
-          INPUT_RK805_PWRKEY = yes;   # Power key input driver
+          MFD_RK8XX_SPI = yes;        # RK806 PMIC MFD driver via SPI
+          PINCTRL_RK805 = yes;        # RK8XX family pinctrl driver
+          INPUT_RK805_PWRKEY = yes;   # RK8XX power key input driver
         };
       };
     in
