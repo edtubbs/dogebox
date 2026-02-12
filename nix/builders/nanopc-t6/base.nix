@@ -49,9 +49,13 @@
   # earlycon provides serial output during early boot before the full
   # UART driver loads; keep_bootcon keeps earlycon active alongside the
   # real console so no output is lost during the transition.
+  # clk_ignore_unused and pd_ignore_unused prevent the kernel from gating
+  # UART2 clocks/power before the serial driver has probed.
   boot.kernelParams = [
     "earlycon=uart8250,mmio32,0xfeb50000"
     "keep_bootcon"
+    "clk_ignore_unused"
+    "pd_ignore_unused"
     "console=ttyS2,1500000"
     "console=tty1"
   ];
