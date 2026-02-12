@@ -31,10 +31,11 @@
  
 +		/*
 +		 * Configure PMIC reset behavior when RESETB pin is asserted
-+		 * (physical reset button). Mode 1: reset all power off registers,
-+		 * force state to ACTIVE mode (matches FriendlyARM pmic-reset-func=1).
++		 * (physical reset button). Mode 0: restart PMU — full power
++		 * cycle of all regulators, causing a cold reboot.
++		 * Mode 1 (force ACTIVE) is a no-op on running systems.
 +		 */
-+		rockchip,reset-mode = <1>;
++		rockchip,reset-mode = <0>;
 +
  		vcc1-supply = <&vcc4v0_sys>;
  		vcc2-supply = <&vcc4v0_sys>;

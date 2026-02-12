@@ -61,11 +61,11 @@ These are **mainline kernel** config names. The FriendlyARM vendor kernel (v6.1.
 - **Kernel driver**: None — handled at PMIC hardware level
 - **Input event**: None
 - **Behavior**: Configured by the `rockchip,reset-mode` device tree property on the RK806 PMIC node:
-  - Mode 0: Restart PMU (full power cycle, regulators briefly interrupted)
-  - Mode 1: Reset all power off registers, force state to ACTIVE mode
-  - Mode 2: Same as mode 1, also pulls RESETB pin down for 5ms
+  - Mode 0: **Restart PMU** — full power cycle of all regulators, cold reboot (**correct for reset button**)
+  - Mode 1: Reset power-off registers, force ACTIVE state — **no visible effect on running system**
+  - Mode 2: Same as mode 1, also pulls RESETB output low for 5ms
 
-The device tree patch sets `rockchip,reset-mode = <1>` to match the FriendlyARM vendor kernel behavior (`pmic-reset-func = <1>`). Without this property, the PMIC uses its hardware default. The mainline kernel's `rk8xx-core.c` reads this property during probe and writes it to `RK806_SYS_CFG3`.
+The device tree patch sets `rockchip,reset-mode = <0>` for a full PMU restart (cold reboot) when the reset button is pressed. Mode 1 was previously used (matching FriendlyARM's `pmic-reset-func = <1>`) but is wrong for mainline: it only resets internal PMIC registers without power-cycling regulators, so a running system sees no effect. The FriendlyARM vendor PMIC driver (`rk806-core.c`) does additional initialization beyond what mainline's `rk8xx-core.c` does, which is why mode 1 may work differently in the vendor kernel.
 
 ### 3. Mask ROM Button (SARADC)
 
@@ -90,6 +90,7 @@ Earlier attempts tried:
 2. Adding `pwrkey { status = "okay"; }` DT node — only works with FriendlyARM vendor kernel
 3. Treating the power button and reset button as the same button — they are separate hardware
 4. Configuring `HandlePowerKey=reboot` in systemd-logind — this changes the power button behavior, not the reset button which is hardware-only
+5. Using `rockchip,reset-mode = <1>` — mode 1 is a no-op for running systems (only resets PMIC registers, doesn't power-cycle)
 
 ## Device peripheral firmware
 
