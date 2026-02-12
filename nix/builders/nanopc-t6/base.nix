@@ -81,16 +81,15 @@
           PINCTRL_RK805 = yes;        # RK8XX family pinctrl driver
           INPUT_RK805_PWRKEY = yes;   # RK8XX power key input driver
         };
+        kernelPatches = [
+          {
+            name = "rk3588-nanopc-t6.dtsi.patch";
+            patch = ./rk3588-nanopc-t6.dtsi.patch;
+          }
+        ];
       };
     in
     lib.mkForce (pkgs.linuxPackagesFor customKernel);
-
-  boot.kernelPatches = [
-    {
-      name = "rk3588-nanopc-t6.dtsi.patch";
-      patch = ./rk3588-nanopc-t6.dtsi.patch;
-    }
-  ];
 
 
   boot.initrd.availableKernelModules = [
