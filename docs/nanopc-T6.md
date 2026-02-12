@@ -60,12 +60,14 @@ These are **mainline kernel** config names. The FriendlyARM vendor kernel (v6.1.
 - **Mechanism**: Pure hardware reset — asserts RESETB low, which triggers the PMIC's reset function. **Bypasses the kernel entirely** (no software event, no clean shutdown)
 - **Kernel driver**: None — handled at PMIC hardware level
 - **Input event**: None
-- **Behavior**: Configured by the `rockchip,reset-mode` device tree property on the RK806 PMIC node:
-  - Mode 0: **Restart PMU** — full power cycle of all regulators, cold reboot (**correct for reset button**)
-  - Mode 1: Reset power-off registers, force ACTIVE state — **no visible effect on running system**
-  - Mode 2: Same as mode 1, also pulls RESETB output low for 5ms
+- **Behavior**: Configured by `RST_FUN` bits [7:6] in the RK806's `SYS_CFG3` register (0x72). The mainline kernel DT binding (`rockchip,reset-mode`) and FriendlyARM vendor DT property (`pmic-reset-func`) both map to this register:
+  - Mode 0: **Restart PMU** — full power cycle of all regulators
+  - Mode 1: Reset all power-off registers, force state to ACTIVE mode (FriendlyARM default)
+  - Mode 2: Same as mode 1, also pulls RESETB pin low for 5ms (resets SoC via CHIP_RESETB)
 
-The device tree patch sets `rockchip,reset-mode = <0>` for a full PMU restart (cold reboot) when the reset button is pressed. Mode 1 was previously used (matching FriendlyARM's `pmic-reset-func = <1>`) but is wrong for mainline: it only resets internal PMIC registers without power-cycling regulators, so a running system sees no effect. The FriendlyARM vendor PMIC driver (`rk806-core.c`) does additional initialization beyond what mainline's `rk8xx-core.c` does, which is why mode 1 may work differently in the vendor kernel.
+**Current approach**: The DT patch does NOT set `rockchip,reset-mode`. This means the mainline `rk8xx-core.c` MFD driver skips the RST_FUN register write during probe, preserving whatever U-Boot configured. Since the reset button works correctly in U-Boot, preserving its PMIC configuration is the most reliable approach.
+
+FriendlyARM's vendor kernel uses `pmic-reset-func = <1>` and their vendor PMIC driver (`rk806-core.c`) handles it. Their driver does additional initialization beyond mainline's `rk8xx-core.c`, which is why mode values may behave differently between the two kernels.
 
 ### 3. Mask ROM Button (SARADC)
 
@@ -80,7 +82,7 @@ The device tree patch sets `rockchip,reset-mode = <0>` for a full PMU restart (c
 This system uses `nabam/nixos-rockchip`'s `kernel_linux_latest_rockchip_stable`, which is the **mainline Linux kernel** with Rockchip-specific config options. It is NOT the FriendlyARM vendor kernel (v6.1.y).
 
 Key differences:
-- **Mainline kernel**: `rk8xx-core.c` unconditionally creates pwrkey MFD cell for RK806. Reset mode configured via `rockchip,reset-mode` DT property.
+- **Mainline kernel**: `rk8xx-core.c` unconditionally creates pwrkey MFD cell for RK806. Reset mode configured via `rockchip,reset-mode` DT property. During probe, `pre_init_reg` writes to `SYS_CFG3` bit[1] (slave restart) but does NOT touch RST_FUN bits[7:6] unless `rockchip,reset-mode` is present.
 - **FriendlyARM kernel**: `rk806-core.c` requires an explicit `pwrkey { status = "okay"; }` DT node. Reset mode configured via `pmic-reset-func` DT property.
 
 ### Previous Incorrect Approaches
@@ -90,7 +92,9 @@ Earlier attempts tried:
 2. Adding `pwrkey { status = "okay"; }` DT node — only works with FriendlyARM vendor kernel
 3. Treating the power button and reset button as the same button — they are separate hardware
 4. Configuring `HandlePowerKey=reboot` in systemd-logind — this changes the power button behavior, not the reset button which is hardware-only
-5. Using `rockchip,reset-mode = <1>` — mode 1 is a no-op for running systems (only resets PMIC registers, doesn't power-cycle)
+5. Setting `rockchip,reset-mode = <1>` — was never actually tested due to malformed patch (build failed)
+6. Setting `rockchip,reset-mode = <0>` — mode 0 (restart PMU) may not reliably reset the SoC if power rails don't drop below POR threshold
+7. **Solution**: Do not set `rockchip,reset-mode` at all — let U-Boot's working PMIC config persist through to Linux
 
 ## Device peripheral firmware
 

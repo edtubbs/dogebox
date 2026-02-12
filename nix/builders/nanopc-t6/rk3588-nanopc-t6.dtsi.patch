@@ -25,18 +25,3 @@
  	};
  };
  
-@@ -809,6 +827,14 @@
- 
- 		system-power-controller;
- 
-+		/*
-+		 * Configure PMIC reset behavior when RESETB pin is asserted
-+		 * (physical reset button). Mode 0: restart PMU — full power
-+		 * cycle of all regulators, causing a cold reboot.
-+		 * Mode 1 (force ACTIVE) is a no-op on running systems.
-+		 */
-+		rockchip,reset-mode = <0>;
-+
- 		vcc1-supply = <&vcc4v0_sys>;
- 		vcc2-supply = <&vcc4v0_sys>;
- 		vcc3-supply = <&vcc4v0_sys>;

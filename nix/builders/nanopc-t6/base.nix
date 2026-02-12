@@ -62,8 +62,10 @@
   #    Default NixOS behavior: short press = poweroff, which is correct.
   #
   # 2. Reset button (RESETB) — connected to RK806 PMIC RESETB pin.
-  #    Hardware-level reset, bypasses kernel entirely. Configured via
-  #    rockchip,reset-mode device tree property (see rk3588-nanopc-t6.dtsi.patch).
+  #    Hardware-level reset, bypasses kernel entirely. The PMIC's reset
+  #    function (RST_FUN in SYS_CFG3) is configured by U-Boot and left
+  #    untouched by the kernel — do NOT add rockchip,reset-mode to the
+  #    device tree, as overriding U-Boot's working config breaks the button.
   #
   # 3. Mask ROM button — connected to SARADC channel 0.
   #    Used for entering Mask ROM/recovery mode during boot.
