@@ -25,3 +25,12 @@
  	};
  };
  
+@@ -775,6 +793,8 @@
+ 
+ 		system-power-controller;
+ 
++		rockchip,reset-mode = <2>;
++
+ 		vcc1-supply = <&vcc4v0_sys>;
+ 		vcc2-supply = <&vcc4v0_sys>;
+ 		vcc3-supply = <&vcc4v0_sys>;
