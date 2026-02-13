@@ -71,6 +71,8 @@ These are **mainline kernel** config names. The FriendlyARM vendor kernel (v6.1.
 
 2. **DT property** (`rockchip,reset-mode = <2>`): Mode 2 resets PMIC registers, forces ACTIVE state, AND explicitly pulls the RESETB output low for 5ms. This ensures the SoC's reset input (CHIP_RESETB_N) sees the reset signal. Mode 0 (PMU restart) might not reliably reset the SoC if bypass capacitors hold power rails above the POR threshold. Mode 2 avoids this by using the dedicated reset signal path.
 
+The DTS patch also carries the OP-TEE `firmware`/`reserved-memory` nodes, which are required for this image and should not be removed.
+
 FriendlyARM's vendor kernel uses `pmic-reset-func = <1>` and their vendor PMIC driver (`rk806-core.c`) handles it differently from mainline.
 
 ### 3. Mask ROM Button (SARADC)

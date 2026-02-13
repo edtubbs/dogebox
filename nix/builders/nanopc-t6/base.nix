@@ -65,8 +65,8 @@
   #    Hardware-level reset, bypasses kernel entirely. Requires two fixes:
   #    a) Kernel patch disables SLAVE_RESTART_FUN (rk806-disable-slave-restart.patch)
   #       so the MFD driver doesn't repurpose RESETB for multi-PMIC slave restart.
-  #    b) DT sets rockchip,reset-mode = <2> which resets PMIC registers and forces
-  #       ACTIVE state so the SoC power-on-resets.
+  #    b) DT sets rockchip,reset-mode = <2> which resets PMIC registers, forces
+  #       ACTIVE state, and asserts RESETB low for 5ms so the SoC resets.
   #
   # 3. Mask ROM button — connected to SARADC channel 0.
   #    Used for entering Mask ROM/recovery mode during boot.
