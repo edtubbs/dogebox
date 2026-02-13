@@ -66,7 +66,7 @@
   #    a) Kernel patch disables SLAVE_RESTART_FUN (rk806-disable-slave-restart.patch)
   #       so the MFD driver doesn't repurpose RESETB for multi-PMIC slave restart.
   #    b) DT sets rockchip,reset-mode = <1> which resets PMIC registers and forces
-  #       ACTIVE state.
+  #       ACTIVE state (matching FriendlyARM's known-working configuration).
   #
   # 3. Mask ROM button — connected to SARADC channel 0.
   #    Used for entering Mask ROM/recovery mode during boot.

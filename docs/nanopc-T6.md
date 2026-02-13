@@ -69,7 +69,7 @@ These are **mainline kernel** config names. The FriendlyARM vendor kernel (v6.1.
 
 1. **Kernel patch** (`rk806-disable-slave-restart.patch`): The mainline `rk8xx-core.c` MFD driver unconditionally enables `SLAVE_RESTART_FUN` (SYS_CFG3 bit[1]) during probe for multi-PMIC setups where a master can restart slave PMICs via the RESETB pin. On the NanoPC-T6 (single PMIC), this is unnecessary and may interfere with RESETB button input handling. The kernel patch changes the `rk806_pre_init_reg[]` entry from `RK806_SLAVE_RESTART_FUN_EN` to `RK806_SLAVE_RESTART_FUN_OFF`.
 
-2. **DT property** (`rockchip,reset-mode = <1>`): Mode 1 resets PMIC registers and forces ACTIVE state. This matches FriendlyARM's behavior (`pmic-reset-func = <1>`) while keeping the mainline DT binding.
+2. **DT property** (`rockchip,reset-mode = <1>`): Mode 1 resets PMIC registers and forces ACTIVE state, matching FriendlyARM's working NanoPC-T6 configuration (`pmic-reset-func = <1>`) using the mainline DT binding.
 
 FriendlyARM's vendor kernel uses `pmic-reset-func = <1>` and their vendor PMIC driver (`rk806-core.c`) handles it differently from mainline.
 
