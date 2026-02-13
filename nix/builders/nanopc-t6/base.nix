@@ -74,6 +74,20 @@
       name = "rk3588-nanopc-t6.dtsi.patch";
       patch = ./rk3588-nanopc-t6.dtsi.patch;
     }
+    {
+      # Ensure the DesignWare 8250 UART driver and serial console support
+      # are built-in (not modules) so the serial console on ttyS2 is
+      # available immediately during boot, not after module loading.
+      name = "serial-console-builtin";
+      patch = null;
+      extraStructuredConfig = with lib.kernel; {
+        SERIAL_8250 = yes;
+        SERIAL_8250_CONSOLE = yes;
+        SERIAL_8250_DW = yes;
+        SERIAL_OF_PLATFORM = yes;
+        SERIAL_EARLYCON = yes;
+      };
+    }
   ];
 
   boot.initrd.availableKernelModules = [
