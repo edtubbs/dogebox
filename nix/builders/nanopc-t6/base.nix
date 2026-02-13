@@ -43,14 +43,20 @@
     })
   ];
 
-  # Enable both video and serial console output via the Rockchip FIQ debugger.
-  # The rk3588 debug UART (UART2) is accessible via the USB-C debug port.
-  # The FriendlyARM kernel provides this as `ttyFIQ0` using the Rockchip FIQ
-  # debugger driver (backported below). The earlycon parameter provides serial
-  # output during early boot before the FIQ debugger driver loads.
+  # Enable both video and serial console output.
+  # The rk3588 debug UART (UART2) is accessible via the USB-C debug port
+  # and appears as ttyS2 via the mainline 8250/DW serial driver.
+  # earlycon provides serial output during early boot before the full
+  # UART driver loads; keep_bootcon keeps earlycon active alongside the
+  # real console so no output is lost during the transition.
+  # clk_ignore_unused and pd_ignore_unused prevent the kernel from gating
+  # UART2 clocks/power before the serial driver has probed.
   boot.kernelParams = [
     "earlycon=uart8250,mmio32,0xfeb50000"
-    "console=ttyFIQ0"
+    "keep_bootcon"
+    "clk_ignore_unused"
+    "pd_ignore_unused"
+    "console=ttyS2,1500000"
     "console=tty1"
   ];
 
@@ -69,20 +75,17 @@
       patch = ./rk3588-nanopc-t6.dtsi.patch;
     }
     {
-      # Backport the Rockchip FIQ debugger driver from the vendor kernel
-      # (armbian/linux-rockchip rk-6.1-rkr5.1). This creates the ttyFIQ0
-      # serial console device used by FriendlyARM kernels. Compiled without
-      # CONFIG_FIQ_DEBUGGER_TRUST_ZONE to avoid dependency on Rockchip SIP
-      # calls; uses standard IRQ mode instead.
-      name = "rockchip-fiq-debugger";
-      patch = ./rockchip-fiq-debugger.patch;
+      # Ensure the DesignWare 8250 UART driver and serial console support
+      # are built-in (not modules) so the serial console on ttyS2 is
+      # available immediately during boot, not after module loading.
+      name = "serial-console-builtin";
+      patch = null;
       extraStructuredConfig = with lib.kernel; {
-        FIQ_DEBUGGER = yes;
-        FIQ_DEBUGGER_NO_SLEEP = yes;
-        FIQ_DEBUGGER_CONSOLE = yes;
-        FIQ_DEBUGGER_CONSOLE_DEFAULT_ENABLE = yes;
-        RK_CONSOLE_THREAD = yes;
-        ROCKCHIP_FIQ_DEBUGGER = yes;
+        SERIAL_8250 = yes;
+        SERIAL_8250_CONSOLE = yes;
+        SERIAL_8250_DW = yes;
+        SERIAL_OF_PLATFORM = yes;
+        SERIAL_EARLYCON = yes;
       };
     }
   ];
@@ -187,6 +190,13 @@
     ACTION=="add", SUBSYSTEM=="usb", GROUP="69", MODE="0660"
     ACTION=="add", KERNEL=="hidraw*", GROUP="69", MODE="0660"
   '';
+
+  # Enable a login prompt on the USB-C debug serial port.
+  systemd.services."serial-getty@ttyS2" = {
+    enable = true;
+    wantedBy = [ "getty.target" ];
+    serviceConfig.Restart = "always";
+  };
 
   system.activationScripts.rk3588-firmware = ''
     mkdir -p /etc/firmware
