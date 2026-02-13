@@ -56,8 +56,8 @@
     "keep_bootcon"
     "clk_ignore_unused"
     "pd_ignore_unused"
-    "console=ttyS2,1500000"
     "console=tty1"
+    "console=ttyS2,1500000"
   ];
 
   # Use the extlinux boot loader. (NixOS wants to enable GRUB by default)
