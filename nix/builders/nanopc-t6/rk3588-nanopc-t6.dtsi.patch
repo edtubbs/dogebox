@@ -25,11 +25,12 @@
  	};
  };
  
-@@ -793,6 +811,9 @@
- 		gpio-controller;
- 		#gpio-cells = <2>;
-+		pwrkey {
-+			status = "okay";
-+		};
+@@ -775,6 +793,8 @@
  
- 		rk806_dvs1_null: dvs1-null-pins {
+ 		system-power-controller;
+ 
++		rockchip,reset-mode = <2>;
++
+ 		vcc1-supply = <&vcc4v0_sys>;
+ 		vcc2-supply = <&vcc4v0_sys>;
+ 		vcc3-supply = <&vcc4v0_sys>;

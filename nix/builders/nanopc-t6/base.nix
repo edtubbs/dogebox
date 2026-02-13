@@ -55,30 +55,52 @@
   boot.loader.generic-extlinux-compatible.enable = true;
   boot.loader.timeout = 1;
 
+  # NanoPC-T6 has three physical buttons:
+  #
+  # 1. Power button (PWRON) — connected to RK806 PMIC pwrkey input.
+  #    Generates KEY_POWER via rk805-pwrkey driver. Handled by systemd-logind.
+  #    Default NixOS behavior: short press = poweroff, which is correct.
+  #
+  # 2. Reset button (RESETB) — connected to RK806 PMIC RESETB pin.
+  #    Hardware-level reset, bypasses kernel entirely. Requires two fixes:
+  #    a) Kernel patch disables SLAVE_RESTART_FUN (rk806-disable-slave-restart.patch)
+  #       so the MFD driver doesn't repurpose RESETB for multi-PMIC slave restart.
+  #    b) DT sets rockchip,reset-mode = <2> which resets PMIC registers and forces
+  #       ACTIVE state so the SoC power-on-resets.
+  #
+  # 3. Mask ROM button — connected to SARADC channel 0.
+  #    Used for entering Mask ROM/recovery mode during boot.
+
   boot.kernelPackages =
     let
-      # Use nabam's mainline-based rockchip kernel
+      # Use nabam's mainline-based rockchip kernel (linux_latest with rockchip config).
+      # nabam's config includes REGULATOR_RK808, GPIO_ROCKCHIP, PINCTRL_ROCKCHIP, SPI_ROCKCHIP
+      # but is missing the RK8XX MFD SPI driver and pwrkey input driver needed for the
+      # RK806 PMIC on the NanoPC-T6.
+      #
+      # Use function-form override to merge our additions with nabam's existing
+      # structuredExtraConfig and to append our kernel patches (DTS + driver fix)
+      # directly into the kernel derivation.
       baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
-      
-      # Override with mainline RK8XX config options for RK806 PMIC support
-      customKernel = baseKernel.kernel.override {
-        structuredExtraConfig = with lib.kernel; {
-          # Mainline kernel RK8XX drivers (supports RK806)
-          MFD_RK8XX_SPI = yes;        # MFD driver for RK806 via SPI
-          REGULATOR_RK808 = yes;      # Regulator driver (covers RK806)
-          PINCTRL_RK805 = yes;        # Pinctrl driver (covers RK806)
-          INPUT_RK805_PWRKEY = yes;   # Power key input driver
-        };
-      };
+      customKernel = baseKernel.kernel.override (prev: {
+        structuredExtraConfig = (prev.structuredExtraConfig or {}) // (with lib.kernel; {
+          MFD_RK8XX_SPI = yes;        # RK806 PMIC MFD driver via SPI
+          PINCTRL_RK805 = yes;        # RK8XX family pinctrl driver
+          INPUT_RK805_PWRKEY = yes;   # RK8XX power key input driver
+        });
+        kernelPatches = (prev.kernelPatches or []) ++ [
+          {
+            name = "rk3588-nanopc-t6.dtsi.patch";
+            patch = ./rk3588-nanopc-t6.dtsi.patch;
+          }
+          {
+            name = "rk806-disable-slave-restart.patch";
+            patch = ./rk806-disable-slave-restart.patch;
+          }
+        ];
+      });
     in
     lib.mkForce (pkgs.linuxPackagesFor customKernel);
-
-  boot.kernelPatches = [
-    {
-      name = "rk3588-nanopc-t6.dtsi.patch";
-      patch = ./rk3588-nanopc-t6.dtsi.patch;
-    }
-  ];
 
 
   boot.initrd.availableKernelModules = [
