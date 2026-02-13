@@ -29,7 +29,7 @@
  
  		system-power-controller;
  
-+		rockchip,reset-mode = <1>;
++		rockchip,reset-mode = <2>;
 +
  		vcc1-supply = <&vcc4v0_sys>;
  		vcc2-supply = <&vcc4v0_sys>;

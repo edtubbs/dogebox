@@ -69,7 +69,9 @@ These are **mainline kernel** config names. The FriendlyARM vendor kernel (v6.1.
 
 1. **Kernel patch** (`rk806-disable-slave-restart.patch`): The mainline `rk8xx-core.c` MFD driver unconditionally enables `SLAVE_RESTART_FUN` (SYS_CFG3 bit[1]) during probe for multi-PMIC setups where a master can restart slave PMICs via the RESETB pin. On the NanoPC-T6 (single PMIC), this is unnecessary and may interfere with RESETB button input handling. The kernel patch changes the `rk806_pre_init_reg[]` entry from `RK806_SLAVE_RESTART_FUN_EN` to `RK806_SLAVE_RESTART_FUN_OFF`.
 
-2. **DT property** (`rockchip,reset-mode = <1>`): Mode 1 resets PMIC registers and forces ACTIVE state, matching FriendlyARM's working NanoPC-T6 configuration (`pmic-reset-func = <1>`) using the mainline DT binding.
+2. **DT property** (`rockchip,reset-mode = <2>`): Mode 2 resets PMIC registers, forces ACTIVE state, AND explicitly pulls the RESETB output low for 5ms. This ensures the SoC's reset input (CHIP_RESETB_N) sees the reset signal. Mode 0 (PMU restart) might not reliably reset the SoC if bypass capacitors hold power rails above the POR threshold. Mode 2 avoids this by using the dedicated reset signal path.
+
+The DTS patch also carries the OP-TEE `firmware`/`reserved-memory` nodes, which are required for this image and should not be removed.
 
 FriendlyARM's vendor kernel uses `pmic-reset-func = <1>` and their vendor PMIC driver (`rk806-core.c`) handles it differently from mainline.
 
@@ -96,10 +98,10 @@ Earlier attempts tried:
 2. Adding `pwrkey { status = "okay"; }` DT node — only works with FriendlyARM vendor kernel
 3. Treating the power button and reset button as the same button — they are separate hardware
 4. Configuring `HandlePowerKey=reboot` in systemd-logind — this changes the power button behavior, not the reset button which is hardware-only
-5. Setting `rockchip,reset-mode = <1>` — now used as the current DT setting
+5. Setting `rockchip,reset-mode = <1>` — was never actually tested due to malformed patch (build failed)
 6. Setting `rockchip,reset-mode = <0>` — mode 0 (restart PMU) tested but didn't work; SoC may not reset if caps hold voltage
 7. Removing `rockchip,reset-mode` entirely — tested but didn't work; letting U-Boot config persist wasn't enough because the MFD driver's `pre_init_reg` still modifies SYS_CFG3 (enables SLAVE_RESTART_FUN)
-8. **Current fix**: Disable SLAVE_RESTART_FUN via kernel patch + set mode 1 via DT
+8. **Current fix**: Disable SLAVE_RESTART_FUN via kernel patch + set mode 2 via DT for explicit RESETB output assertion
 
 ## Device peripheral firmware
 
