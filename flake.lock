@@ -302,6 +302,26 @@
         "type": "github"
       }
     },
+    "rockchip": {
+      "inputs": {
+        "nixpkgsStable": "nixpkgsStable",
+        "nixpkgsUnstable": "nixpkgsUnstable",
+        "utils": "utils"
+      },
+      "locked": {
+        "lastModified": 1768581649,
+        "narHash": "sha256-04wTkfwuXNsx75RhgYfAGIGuzxiEfeI9Pr8uDg7/5xE=",
+        "owner": "nabam",
+        "repo": "nixos-rockchip",
+        "rev": "e164b69f785d09433ffe9b77f32c6f86f345df7f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nabam",
+        "repo": "nixos-rockchip",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "dkm": "dkm",
@@ -311,7 +331,8 @@
         "flake-utils": "flake-utils_2",
         "nixos-generators": "nixos-generators",
         "nixpkgs": "nixpkgs_2",
-        "pre-commit-hooks": "pre-commit-hooks"
+        "pre-commit-hooks": "pre-commit-hooks",
+        "rockchip": "rockchip"
       }
     },
     "systems": {

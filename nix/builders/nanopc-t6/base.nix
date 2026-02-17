@@ -73,13 +73,14 @@
 
   boot.kernelPackages =
     let
-      # Use nixpkgs linuxPackages_latest to avoid dependence on nabam's kernel set.
+      # Prefer a rockchip-tuned kernel set for NanoPC-T6; fall back to nixpkgs
+      # linuxPackages_latest if the rockchip input is unavailable.
       # The base config can miss RK806 PMIC options, so we add them here.
       #
       # Use function-form override to merge our additions with the existing
       # structuredExtraConfig and to append our kernel patches (DTS + driver fix)
       # directly into the kernel derivation.
-      baseKernel = pkgs.linuxPackages_latest;
+      baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_unstable or pkgs.linuxPackages_latest;
       customKernel = baseKernel.kernel.override (prev: {
         structuredExtraConfig = (prev.structuredExtraConfig or {}) // (with lib.kernel; {
           MFD_RK8XX_SPI = yes;        # RK806 PMIC MFD driver via SPI

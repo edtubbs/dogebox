@@ -85,7 +85,7 @@ FriendlyARM's vendor kernel uses `pmic-reset-func = <1>` and their vendor PMIC d
 
 ### Important: Mainline vs FriendlyARM Vendor Kernel
 
-This system uses nixpkgs `linuxPackages_latest`, which is a **mainline Linux kernel**. It is NOT the FriendlyARM vendor kernel (v6.1.y).
+This system prefers `nabam/nixos-rockchip`'s `kernel_linux_latest_rockchip_unstable` (Rockchip-tuned mainline) and falls back to nixpkgs `linuxPackages_latest` if that input is unavailable. It is NOT the FriendlyARM vendor kernel (v6.1.y).
 
 Key differences:
 - **Mainline kernel**: `rk8xx-core.c` unconditionally creates pwrkey MFD cell for RK806. Unconditionally enables `SLAVE_RESTART_FUN` in pre_init_reg. Reset mode configured via `rockchip,reset-mode` DT property.
