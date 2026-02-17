@@ -74,6 +74,8 @@
   boot.kernelPackages =
     let
       # Use nabam's mainline-based rockchip kernel (linux_latest with rockchip config).
+      # Available rockchip legacyPackages include latest stable/unstable and board-
+      # specific variants; latest unstable is the closest drop-in choice for NanoPC-T6.
       # Prefer the unstable track here because reset handling appears broken in the
       # currently pinned stable variant.
       # nabam's config includes REGULATOR_RK808, GPIO_ROCKCHIP, PINCTRL_ROCKCHIP, SPI_ROCKCHIP
