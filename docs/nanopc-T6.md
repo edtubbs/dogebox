@@ -46,7 +46,7 @@ The NanoPC-T6 has **three distinct physical buttons** with different hardware co
 
 #### Kernel Configuration
 
-The following kernel config options are required (added via `structuredExtraConfig` since nabam's kernel doesn't include them):
+The following kernel config options are required (added via `structuredExtraConfig`):
 
 - `CONFIG_MFD_RK8XX_SPI=y` — RK806 PMIC MFD driver via SPI bus
 - `CONFIG_INPUT_RK805_PWRKEY=y` — Power key input driver for RK8XX PMICs
@@ -85,7 +85,7 @@ FriendlyARM's vendor kernel uses `pmic-reset-func = <1>` and their vendor PMIC d
 
 ### Important: Mainline vs FriendlyARM Vendor Kernel
 
-This system uses `nabam/nixos-rockchip`'s `kernel_linux_latest_rockchip_unstable`, which is the **mainline Linux kernel** with Rockchip-specific config options. It is NOT the FriendlyARM vendor kernel (v6.1.y).
+This system uses nixpkgs `linuxPackages_latest`, which is a **mainline Linux kernel**. It is NOT the FriendlyARM vendor kernel (v6.1.y).
 
 Key differences:
 - **Mainline kernel**: `rk8xx-core.c` unconditionally creates pwrkey MFD cell for RK806. Unconditionally enables `SLAVE_RESTART_FUN` in pre_init_reg. Reset mode configured via `rockchip,reset-mode` DT property.

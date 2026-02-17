@@ -73,19 +73,13 @@
 
   boot.kernelPackages =
     let
-      # Use nabam's mainline-based rockchip kernel (linux_latest with rockchip config).
-      # Available rockchip legacyPackages include latest stable/unstable and board-
-      # specific variants; latest unstable is the closest drop-in choice for NanoPC-T6.
-      # Prefer the unstable track here because reset handling appears broken in the
-      # currently pinned stable variant.
-      # nabam's config includes REGULATOR_RK808, GPIO_ROCKCHIP, PINCTRL_ROCKCHIP, SPI_ROCKCHIP
-      # but is missing the RK8XX MFD SPI driver and pwrkey input driver needed for the
-      # RK806 PMIC on the NanoPC-T6.
+      # Use nixpkgs linuxPackages_latest to avoid dependence on nabam's kernel set.
+      # The base config can miss RK806 PMIC options, so we add them here.
       #
-      # Use function-form override to merge our additions with nabam's existing
+      # Use function-form override to merge our additions with the existing
       # structuredExtraConfig and to append our kernel patches (DTS + driver fix)
       # directly into the kernel derivation.
-      baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_unstable;
+      baseKernel = pkgs.linuxPackages_latest;
       customKernel = baseKernel.kernel.override (prev: {
         structuredExtraConfig = (prev.structuredExtraConfig or {}) // (with lib.kernel; {
           MFD_RK8XX_SPI = yes;        # RK806 PMIC MFD driver via SPI
