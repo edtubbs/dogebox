@@ -62,43 +62,47 @@
   #    Default NixOS behavior: short press = poweroff, which is correct.
   #
   # 2. Reset button (RESETB) — connected to RK806 PMIC RESETB pin.
-  #    Hardware-level reset, bypasses kernel entirely. Requires two fixes:
-  #    a) Kernel patch disables SLAVE_RESTART_FUN (rk806-disable-slave-restart.patch)
-  #       so the MFD driver doesn't repurpose RESETB for multi-PMIC slave restart.
-  #    b) DT sets rockchip,reset-mode = <2> which resets PMIC registers, forces
-  #       ACTIVE state, and asserts RESETB low for 5ms so the SoC resets.
+  #    Hardware-level reset, bypasses kernel entirely. Use FriendlyARM's vendor
+  #    kernel path here, which uses rk806-core + pmic-reset-func behavior.
   #
   # 3. Mask ROM button — connected to SARADC channel 0.
   #    Used for entering Mask ROM/recovery mode during boot.
 
   boot.kernelPackages =
     let
-      # Use nixpkgs linuxPackages_latest from the NixOS 25.11 flake input.
-      # The base config can miss RK806 PMIC options, so we add them here.
-      #
-      # Use function-form override to merge our additions with the existing
-      # structuredExtraConfig and to append our kernel patches (DTS + driver fix)
-      # directly into the kernel derivation.
-      baseKernel = pkgs.linuxPackages_latest;
-      customKernel = baseKernel.kernel.override (prev: {
-        structuredExtraConfig = (prev.structuredExtraConfig or {}) // (with lib.kernel; {
-          MFD_RK8XX_SPI = yes;        # RK806 PMIC MFD driver via SPI
-          PINCTRL_RK805 = yes;        # RK8XX family pinctrl driver
-          INPUT_RK805_PWRKEY = yes;   # RK8XX power key input driver
-        });
-        kernelPatches = (prev.kernelPatches or []) ++ [
-          {
-            name = "rk3588-nanopc-t6.dtsi.patch";
-            patch = ./rk3588-nanopc-t6.dtsi.patch;
-          }
-          {
-            name = "rk806-disable-slave-restart.patch";
-            patch = ./rk806-disable-slave-restart.patch;
-          }
-        ];
-      });
+      linux-rk3588-pkg =
+        {
+          fetchFromGitHub,
+          linuxManualConfig,
+          ubootTools,
+          ...
+        }:
+        (linuxManualConfig rec {
+          modDirVersion = "6.1.57";
+          version = modDirVersion;
+
+          src = fetchFromGitHub {
+            owner = "friendlyarm";
+            repo = "kernel-rockchip";
+            rev = "85d0764ec61ebfab6b0d9f6c65f2290068a46fa1";
+            hash = "sha256-oGMx0EYfPQb8XxzObs8CXgXS/Q9pE1O5/fP7/ehRUDA=";
+          };
+
+          configfile = ./nanopc-T6_linux_defconfig;
+          allowImportFromDerivation = true;
+        }).overrideAttrs
+          (old: {
+            nativeBuildInputs = old.nativeBuildInputs ++ [ ubootTools ];
+            prePatch = ''
+              patch -p1 < ${./rk3588-nanopi6-common.dtsi.patch}
+              cp arch/arm64/boot/dts/rockchip/rk3588-nanopi6-rev01.dts arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
+              cp arch/arm64/boot/dts/rockchip/rk3588-nanopi6-rev07.dts arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6-lts.dts
+              sed -i "s/rk3588-nanopi6-rev0a.dtb/rk3588-nanopi6-rev0a.dtb\ rk3588-nanopc-t6.dtb\ rk3588-nanopc-t6-lts.dtb/" arch/arm64/boot/dts/rockchip/Makefile
+            '';
+          });
+      linux-rk3588 = pkgs.callPackage linux-rk3588-pkg { };
     in
-    lib.mkForce (pkgs.linuxPackagesFor customKernel);
+    pkgs.recurseIntoAttrs (pkgs.linuxPackagesFor linux-rk3588);
 
 
   boot.initrd.availableKernelModules = [
