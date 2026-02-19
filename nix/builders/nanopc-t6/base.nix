@@ -88,16 +88,21 @@
             hash = "sha256-oGMx0EYfPQb8XxzObs8CXgXS/Q9pE1O5/fP7/ehRUDA=";
           };
 
-          configfile = ./nanopc-T6_linux_defconfig;
+          configfile = ./nanopc-t6_linux_defconfig;
           allowImportFromDerivation = true;
         }).overrideAttrs
           (old: {
             nativeBuildInputs = old.nativeBuildInputs ++ [ ubootTools ];
             prePatch = ''
               patch -p1 < ${./rk3588-nanopi6-common.dtsi.patch}
+              # FriendlyARM ships NanoPI6 DTs; map rev01 -> NanoPC-T6 and rev07 -> NanoPC-T6 LTS.
               cp arch/arm64/boot/dts/rockchip/rk3588-nanopi6-rev01.dts arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
               cp arch/arm64/boot/dts/rockchip/rk3588-nanopi6-rev07.dts arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6-lts.dts
-              sed -i "s/rk3588-nanopi6-rev0a.dtb/rk3588-nanopi6-rev0a.dtb\ rk3588-nanopc-t6.dtb\ rk3588-nanopc-t6-lts.dtb/" arch/arm64/boot/dts/rockchip/Makefile
+              # Include the NanoPC-T6 DTBs in the vendor kernel DT build list.
+              grep -q 'rk3588-nanopc-t6.dtb' arch/arm64/boot/dts/rockchip/Makefile || \
+                echo 'dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588-nanopc-t6.dtb' >> arch/arm64/boot/dts/rockchip/Makefile
+              grep -q 'rk3588-nanopc-t6-lts.dtb' arch/arm64/boot/dts/rockchip/Makefile || \
+                echo 'dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588-nanopc-t6-lts.dtb' >> arch/arm64/boot/dts/rockchip/Makefile
             '';
           });
       linux-rk3588 = pkgs.callPackage linux-rk3588-pkg { };

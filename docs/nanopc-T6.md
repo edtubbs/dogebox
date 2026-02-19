@@ -52,7 +52,7 @@ The following kernel config options are required (added via `structuredExtraConf
 - `CONFIG_INPUT_RK805_PWRKEY=y` — Power key input driver for RK8XX PMICs
 - `CONFIG_PINCTRL_RK805=y` — RK8XX family pinctrl driver
 
-For the current NanoPC-T6 image path, the kernel comes from FriendlyARM's `kernel-rockchip` fork using `nanopc-T6_linux_defconfig`.
+For the current NanoPC-T6 image path, the kernel comes from FriendlyARM's `kernel-rockchip` fork using `nanopc-t6_linux_defconfig`.
 
 ### 2. Reset Button (RESETB)
 
