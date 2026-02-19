@@ -38,10 +38,6 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    rockchip = {
-      url = "github:nabam/nixos-rockchip";
-    };
-
   };
   outputs =
     {
