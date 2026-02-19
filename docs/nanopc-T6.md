@@ -52,7 +52,7 @@ The following kernel config options are required (added via `structuredExtraConf
 - `CONFIG_INPUT_RK805_PWRKEY=y` — Power key input driver for RK8XX PMICs
 - `CONFIG_PINCTRL_RK805=y` — RK8XX family pinctrl driver
 
-For the current NanoPC-T6 image path, the kernel comes from FriendlyARM's `kernel-rockchip` fork using `nanopc-t6_linux_defconfig`.
+For the current NanoPC-T6 image path, the kernel comes from `nabam/nixos-rockchip` (mainline track) with NanoPC-T6 overrides.
 
 ### 2. Reset Button (RESETB)
 
@@ -67,10 +67,9 @@ For the current NanoPC-T6 image path, the kernel comes from FriendlyARM's `kerne
 
 **Current approach**:
 
-1. Use FriendlyARM's vendor kernel fork (`kernel-rockchip`) with the board's vendor defconfig.
-2. Keep the NanoPI6 common DTS OP-TEE patch (`rk3588-nanopi6-common.dtsi.patch`) so OP-TEE `firmware`/`reserved-memory` nodes remain present.
-
-FriendlyARM's vendor kernel uses `pmic-reset-func = <1>` and `rk806-core.c`, which matches observed reset behavior on NanoPC-T6.
+1. Keep mainline/nabam kernel and apply RK806 `SLAVE_RESTART_FUN` disable patch.
+2. Keep OP-TEE `firmware`/`reserved-memory` nodes in DTS patch.
+3. Mirror FriendlyARM reset semantics by setting `pmic-reset-func = <1>` in DTS and adding a compatibility kernel patch so mainline also reads that property when `rockchip,reset-mode` is absent.
 
 ### 3. Mask ROM Button (SARADC)
 
@@ -82,11 +81,11 @@ FriendlyARM's vendor kernel uses `pmic-reset-func = <1>` and `rk806-core.c`, whi
 
 ### Important: Mainline vs FriendlyARM Vendor Kernel
 
-This system uses the FriendlyARM vendor kernel fork (`friendlyarm/kernel-rockchip`, v6.1.y line) for NanoPC-T6.
+This system uses `nabam/nixos-rockchip`'s mainline kernel track for NanoPC-T6.
 
 Key differences:
 - **Mainline kernel**: `rk8xx-core.c` unconditionally creates pwrkey MFD cell for RK806. Unconditionally enables `SLAVE_RESTART_FUN` in pre_init_reg. Reset mode configured via `rockchip,reset-mode` DT property.
-- **FriendlyARM kernel (used here)**: `rk806-core.c` requires an explicit `pwrkey { status = "okay"; }` DT node. Does NOT enable `SLAVE_RESTART_FUN`. Reset mode configured via `pmic-reset-func` DT property.
+- **FriendlyARM kernel**: `rk806-core.c` requires an explicit `pwrkey { status = "okay"; }` DT node. Does NOT enable `SLAVE_RESTART_FUN`. Reset mode configured via `pmic-reset-func` DT property.
 
 ### Previous Incorrect Approaches
 
@@ -98,7 +97,7 @@ Earlier attempts tried:
 5. Setting `rockchip,reset-mode = <1>` — was never actually tested due to malformed patch (build failed)
 6. Setting `rockchip,reset-mode = <0>` — mode 0 (restart PMU) tested but didn't work; SoC may not reset if caps hold voltage
 7. Removing `rockchip,reset-mode` entirely — tested but didn't work; letting U-Boot config persist wasn't enough because the MFD driver's `pre_init_reg` still modifies SYS_CFG3 (enables SLAVE_RESTART_FUN)
-8. **Current path**: Use FriendlyARM vendor kernel + NanoPI6 common DTS OP-TEE patch
+8. **Current path**: Use nabam mainline kernel + RK806 reset compatibility patches mirroring FriendlyARM semantics
 
 ## Device peripheral firmware
 

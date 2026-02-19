@@ -62,52 +62,40 @@
   #    Default NixOS behavior: short press = poweroff, which is correct.
   #
   # 2. Reset button (RESETB) — connected to RK806 PMIC RESETB pin.
-  #    Hardware-level reset, bypasses kernel entirely. Use FriendlyARM's vendor
-  #    kernel path here, which uses rk806-core + pmic-reset-func behavior.
+  #    Hardware-level reset, bypasses kernel entirely. Use mainline (nabam)
+  #    kernel with compatibility patches for FriendlyARM reset semantics.
   #
   # 3. Mask ROM button — connected to SARADC channel 0.
   #    Used for entering Mask ROM/recovery mode during boot.
 
   boot.kernelPackages =
     let
-      linux-rk3588-pkg =
-        {
-          fetchFromGitHub,
-          linuxManualConfig,
-          ubootTools,
-          ...
-        }:
-        (linuxManualConfig rec {
-          modDirVersion = "6.1.57";
-          version = modDirVersion;
-
-          src = fetchFromGitHub {
-            owner = "friendlyarm";
-            repo = "kernel-rockchip";
-            rev = "85d0764ec61ebfab6b0d9f6c65f2290068a46fa1";
-            hash = "sha256-oGMx0EYfPQb8XxzObs8CXgXS/Q9pE1O5/fP7/ehRUDA=";
-          };
-
-          configfile = ./nanopc-t6_linux_defconfig;
-          allowImportFromDerivation = true;
-        }).overrideAttrs
-          (old: {
-            nativeBuildInputs = old.nativeBuildInputs ++ [ ubootTools ];
-            prePatch = ''
-              patch -p1 < ${./rk3588-nanopi6-common.dtsi.patch}
-              # FriendlyARM ships NanoPI6 DTs; map rev01 -> NanoPC-T6 and rev07 -> NanoPC-T6 LTS.
-              cp arch/arm64/boot/dts/rockchip/rk3588-nanopi6-rev01.dts arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6.dts
-              cp arch/arm64/boot/dts/rockchip/rk3588-nanopi6-rev07.dts arch/arm64/boot/dts/rockchip/rk3588-nanopc-t6-lts.dts
-              # Include the NanoPC-T6 DTBs in the vendor kernel DT build list.
-              grep -q 'rk3588-nanopc-t6.dtb' arch/arm64/boot/dts/rockchip/Makefile || \
-                echo 'dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588-nanopc-t6.dtb' >> arch/arm64/boot/dts/rockchip/Makefile
-              grep -q 'rk3588-nanopc-t6-lts.dtb' arch/arm64/boot/dts/rockchip/Makefile || \
-                echo 'dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588-nanopc-t6-lts.dtb' >> arch/arm64/boot/dts/rockchip/Makefile
-            '';
-          });
-      linux-rk3588 = pkgs.callPackage linux-rk3588-pkg { };
+      # Use nabam's mainline-based rockchip kernel (linux_latest with rockchip config).
+      # Merge our RK806 options and append compatibility patches directly.
+      baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_unstable;
+      customKernel = baseKernel.kernel.override (prev: {
+        structuredExtraConfig = (prev.structuredExtraConfig or {}) // (with lib.kernel; {
+          MFD_RK8XX_SPI = yes;        # RK806 PMIC MFD driver via SPI
+          PINCTRL_RK805 = yes;        # RK8XX family pinctrl driver
+          INPUT_RK805_PWRKEY = yes;   # RK8XX power key input driver
+        });
+        kernelPatches = (prev.kernelPatches or []) ++ [
+          {
+            name = "rk3588-nanopc-t6.dtsi.patch";
+            patch = ./rk3588-nanopc-t6.dtsi.patch;
+          }
+          {
+            name = "rk806-disable-slave-restart.patch";
+            patch = ./rk806-disable-slave-restart.patch;
+          }
+          {
+            name = "rk806-friendlyarm-reset-compat.patch";
+            patch = ./rk806-friendlyarm-reset-compat.patch;
+          }
+        ];
+      });
     in
-    pkgs.recurseIntoAttrs (pkgs.linuxPackagesFor linux-rk3588);
+    lib.mkForce (pkgs.linuxPackagesFor customKernel);
 
 
   boot.initrd.availableKernelModules = [
