@@ -44,8 +44,8 @@
   ];
 
   # Enable both video and serial console output.
-  # The rk3588 debug UART (UART2) is accessible via the USB-C debug port
-  # and appears as ttyS2 via the mainline 8250/DW serial driver.
+  # The rk3588 debug UART (UART2) is accessible via the USB-C debug port.
+  # Depending on kernel/device-tree aliasing it may appear as ttyS2 or ttyS0.
   # earlycon provides serial output during early boot before the full
   # UART driver loads; keep_bootcon keeps earlycon active alongside the
   # real console so no output is lost during the transition.
@@ -56,8 +56,9 @@
     "keep_bootcon"
     "clk_ignore_unused"
     "pd_ignore_unused"
-    "console=ttyS2,1500000"
     "console=tty1"
+    "console=ttyS2,1500000"
+    "console=ttyS0,1500000"
   ];
 
   # Use the extlinux boot loader. (NixOS wants to enable GRUB by default)
@@ -67,7 +68,7 @@
   boot.loader.timeout = 1;
 
   boot.kernelPackages =
-    inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
+    inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_unstable;
 
   boot.kernelPatches = [
     {
@@ -80,7 +81,7 @@
       # available immediately during boot, not after module loading.
       name = "serial-console-builtin";
       patch = null;
-      extraStructuredConfig = with lib.kernel; {
+      structuredExtraConfig = with lib.kernel; {
         SERIAL_8250 = yes;
         SERIAL_8250_CONSOLE = yes;
         SERIAL_8250_DW = yes;
@@ -193,6 +194,11 @@
 
   # Enable a login prompt on the USB-C debug serial port.
   systemd.services."serial-getty@ttyS2" = {
+    enable = true;
+    wantedBy = [ "getty.target" ];
+    serviceConfig.Restart = "always";
+  };
+  systemd.services."serial-getty@ttyS0" = {
     enable = true;
     wantedBy = [ "getty.target" ];
     serviceConfig.Restart = "always";
