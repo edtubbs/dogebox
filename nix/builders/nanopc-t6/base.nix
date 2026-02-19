@@ -80,7 +80,7 @@
       # available immediately during boot, not after module loading.
       name = "serial-console-builtin";
       patch = null;
-      extraStructuredConfig = with lib.kernel; {
+      structuredExtraConfig = with lib.kernel; {
         SERIAL_8250 = yes;
         SERIAL_8250_CONSOLE = yes;
         SERIAL_8250_DW = yes;
