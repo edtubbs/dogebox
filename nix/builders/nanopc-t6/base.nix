@@ -67,8 +67,7 @@
   boot.loader.generic-extlinux-compatible.enable = true;
   boot.loader.timeout = 1;
 
-  boot.kernelPackages =
-    inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
+  boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.callPackage ./kernel-friendlyarm.nix { });
 
   boot.kernelPatches = [
     {
