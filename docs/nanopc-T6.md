@@ -46,13 +46,13 @@ The NanoPC-T6 has **three distinct physical buttons** with different hardware co
 
 #### Kernel Configuration
 
-The following kernel config options are required (added via `structuredExtraConfig` since nabam's kernel doesn't include them):
+The following kernel config options are required (added via `structuredExtraConfig`):
 
 - `CONFIG_MFD_RK8XX_SPI=y` — RK806 PMIC MFD driver via SPI bus
 - `CONFIG_INPUT_RK805_PWRKEY=y` — Power key input driver for RK8XX PMICs
 - `CONFIG_PINCTRL_RK805=y` — RK8XX family pinctrl driver
 
-These are **mainline kernel** config names. The FriendlyARM vendor kernel (v6.1.y) uses different names (`CONFIG_MFD_RK806_SPI`, etc.) — do not confuse them.
+For the current NanoPC-T6 image path, the kernel comes from `nabam/nixos-rockchip` (mainline track) with NanoPC-T6 overrides.
 
 ### 2. Reset Button (RESETB)
 
@@ -65,13 +65,11 @@ These are **mainline kernel** config names. The FriendlyARM vendor kernel (v6.1.
   - Mode 1: Reset all power-off registers, force state to ACTIVE mode (FriendlyARM default)
   - Mode 2: Same as mode 1, also pulls RESETB pin low for 5ms (resets SoC via CHIP_RESETB)
 
-**Current approach** (two-part fix):
+**Current approach**:
 
-1. **Kernel patch** (`rk806-disable-slave-restart.patch`): The mainline `rk8xx-core.c` MFD driver unconditionally enables `SLAVE_RESTART_FUN` (SYS_CFG3 bit[1]) during probe for multi-PMIC setups where a master can restart slave PMICs via the RESETB pin. On the NanoPC-T6 (single PMIC), this is unnecessary and may interfere with RESETB button input handling. The kernel patch changes the `rk806_pre_init_reg[]` entry from `RK806_SLAVE_RESTART_FUN_EN` to `RK806_SLAVE_RESTART_FUN_OFF`.
-
-2. **DT property** (`rockchip,reset-mode = <2>`): Mode 2 resets PMIC registers, forces ACTIVE state, AND explicitly pulls the RESETB output low for 5ms. This ensures the SoC's reset input (CHIP_RESETB_N) sees the reset signal. Mode 0 (PMU restart) might not reliably reset the SoC if bypass capacitors hold power rails above the POR threshold. Mode 2 avoids this by using the dedicated reset signal path.
-
-FriendlyARM's vendor kernel uses `pmic-reset-func = <1>` and their vendor PMIC driver (`rk806-core.c`) handles it differently from mainline.
+1. Keep mainline/nabam kernel and apply RK806 `SLAVE_RESTART_FUN` disable patch.
+2. Keep OP-TEE `firmware`/`reserved-memory` nodes in DTS patch.
+3. Mirror FriendlyARM reset semantics by setting `pmic-reset-func = <1>` in DTS and adding a compatibility kernel patch so mainline also reads that property when `rockchip,reset-mode` is absent.
 
 ### 3. Mask ROM Button (SARADC)
 
@@ -83,7 +81,7 @@ FriendlyARM's vendor kernel uses `pmic-reset-func = <1>` and their vendor PMIC d
 
 ### Important: Mainline vs FriendlyARM Vendor Kernel
 
-This system uses `nabam/nixos-rockchip`'s `kernel_linux_latest_rockchip_stable`, which is the **mainline Linux kernel** with Rockchip-specific config options. It is NOT the FriendlyARM vendor kernel (v6.1.y).
+This system uses `nabam/nixos-rockchip`'s mainline kernel track for NanoPC-T6.
 
 Key differences:
 - **Mainline kernel**: `rk8xx-core.c` unconditionally creates pwrkey MFD cell for RK806. Unconditionally enables `SLAVE_RESTART_FUN` in pre_init_reg. Reset mode configured via `rockchip,reset-mode` DT property.
@@ -99,7 +97,7 @@ Earlier attempts tried:
 5. Setting `rockchip,reset-mode = <1>` — was never actually tested due to malformed patch (build failed)
 6. Setting `rockchip,reset-mode = <0>` — mode 0 (restart PMU) tested but didn't work; SoC may not reset if caps hold voltage
 7. Removing `rockchip,reset-mode` entirely — tested but didn't work; letting U-Boot config persist wasn't enough because the MFD driver's `pre_init_reg` still modifies SYS_CFG3 (enables SLAVE_RESTART_FUN)
-8. **Current fix**: Disable SLAVE_RESTART_FUN via kernel patch + set mode 2 via DT for explicit RESETB output assertion
+8. **Current path**: Use nabam mainline kernel + RK806 reset compatibility patches mirroring FriendlyARM semantics
 
 ## Device peripheral firmware
 

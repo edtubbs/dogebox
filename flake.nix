@@ -41,6 +41,7 @@ rec {
     rockchip = {
       url = "github:nabam/nixos-rockchip";
     };
+
   };
   outputs =
     {
