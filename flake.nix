@@ -198,6 +198,7 @@ rec {
             ++ (nixpkgs.lib.optionals (format == "iso") [
               (
                 let
+                  # Matches nixosConfigurations."dogeboxos-${builderType}-${arch}" defined below.
                   targetToplevel =
                     self.nixosConfigurations."dogeboxos-${builderType}-${arch}".config.system.build.toplevel;
                 in
