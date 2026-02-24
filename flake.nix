@@ -135,12 +135,19 @@ rec {
               system.activationScripts.copyFlake = getCopyFlakeScript system self;
               system.activationScripts.setOpt = getSetOptScript builderType isBaseBuilder;
               system.activationScripts.versioning = versionScript;
+              system.activationScripts.writeTargetToplevel = ''
+                mkdir -p /etc/dogebox
+                tmp=$(mktemp /etc/dogebox/.target-toplevel.XXXXXX)
+                echo "$systemConfig" > "$tmp"
+                mv "$tmp" /etc/dogebox/target-toplevel
+              '';
             }
           )
         ];
 
       getSpecialArgs = arch: system: builderType: devMode: devBootloader: {
         inherit
+          self
           inputs
           dbxRelease
           builderType
@@ -190,42 +197,9 @@ rec {
         in
         nixos-generators.nixosGenerate {
           inherit system format;
-          modules =
-            [
-              builderSpecificModule
-            ]
-            ++ (mkConfigModules { inherit system builderType isBaseBuilder; })
-            ++ (
-              if (format == "iso") then
-                [
-                  (
-                    let
-                      # Matches nixosConfigurations."dogeboxos-${builderType}-${arch}" defined below.
-                      targetToplevel =
-                        self.nixosConfigurations."dogeboxos-${builderType}-${arch}".config.system.build.toplevel;
-                    in
-                    { ... }:
-                    {
-                      isoImage.storeContents = [ targetToplevel ];
-                      environment.etc."dogebox/target-toplevel".text = "${targetToplevel}";
-                    }
-                  )
-                ]
-              else
-                [
-                  (
-                    { ... }:
-                    {
-                      system.activationScripts.writeTargetToplevel = ''
-                        mkdir -p /etc/dogebox
-                        tmp=$(mktemp /etc/dogebox/.target-toplevel.XXXXXX)
-                        echo "$systemConfig" > "$tmp"
-                        mv "$tmp" /etc/dogebox/target-toplevel
-                      '';
-                    }
-                  )
-                ]
-            );
+          modules = [
+            builderSpecificModule
+          ] ++ (mkConfigModules { inherit system builderType isBaseBuilder; });
           specialArgs = getSpecialArgs arch system builderType devMode devBootloader;
         };
 
