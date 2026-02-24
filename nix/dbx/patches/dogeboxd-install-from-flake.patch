@@ -1,8 +1,16 @@
 diff --git a/cmd/_dbxroot/cmd/install-to-disk.go b/cmd/_dbxroot/cmd/install-to-disk.go
-index d9324b7..f0c4d4d 100644
+index d9324b7..47db2ad 100644
 --- a/cmd/_dbxroot/cmd/install-to-disk.go
 +++ b/cmd/_dbxroot/cmd/install-to-disk.go
-@@ -139,10 +139,14 @@ Example:
+@@ -5,6 +5,7 @@ import (
+ 	"fmt"
+ 	"log"
+ 	"os"
++	"os/exec"
+ 	"strings"
+ 
+ 	"github.com/dogeorg/dogeboxd/cmd/_dbxroot/utils"
+@@ -139,10 +140,21 @@ Example:
  		utils.RunCommand("touch", "/mnt/opt/dbx-installed")
  		utils.RunCommand("chown", "dogeboxd:dogebox", "/mnt/opt/dbx-installed")
  
@@ -12,10 +20,85 @@ index d9324b7..f0c4d4d 100644
 +			log.Printf("Failed to get flake path: %v", err)
 +			os.Exit(1)
 +		}
++
++		// Mount the ISO nix store squashfs and register its paths for offline install.
++		isoNixStore, cleanupISOStore := findISONixStore()
++		defer cleanupISOStore()
++		if isoNixStore != "" {
++			log.Printf("Installing offline from ISO nix store at: %s", isoNixStore)
++		}
  
  		// Install
 -		utils.RunCommand("nixos-install", "--system", strings.TrimSpace(systemClosure), "--no-root-passwd", "--root", "/mnt")
-+		utils.RunCommand("nixos-install", "--flake", flakePath, "--no-root-passwd", "--root", "/mnt")
++		utils.RunCommand("nixos-install", "--flake", flakePath, "--no-root-passwd", "--root", "/mnt", "--option", "substituters", "")
  		// TODO (ando - 28/07/2025) - Figure out if we need umount here, since
  		//                            it did break iso install with `target busy`
  		if variant != builderIso {
+@@ -166,6 +178,67 @@ func init() {
+ 	installToDiskCmd.MarkFlagRequired("variant")
+ }
+ 
++// findISONixStore locates the nix store squashfs from a mounted ISO image.
++// In a NixOS live ISO, the squashfs is already mounted as the lower layer of
++// /nix/store. If an iso9660 filesystem is found instead, its embedded
++// nix-store.squashfs is mounted and its paths are registered into the nix daemon.
++// Returns the squashfs mount path and a cleanup function to unmount it.
++func findISONixStore() (string, func()) {
++	mounts, err := os.ReadFile("/proc/mounts")
++	if err != nil {
++		return "", func() {}
++	}
++
++	var isoMount string
++	for _, line := range strings.Split(string(mounts), "\n") {
++		fields := strings.Fields(line)
++		if len(fields) < 3 {
++			continue
++		}
++		// An already-mounted squashfs is the ISO nix store (standard NixOS live ISO).
++		if fields[2] == "squashfs" {
++			return fields[1], func() {}
++		}
++		// Remember any iso9660 mount for later.
++		if fields[2] == "iso9660" && isoMount == "" {
++			isoMount = fields[1]
++		}
++	}
++
++	// No squashfs found; try to mount nix-store.squashfs from the ISO.
++	if isoMount == "" {
++		return "", func() {}
++	}
++	squashfsImg := isoMount + "/nix-store.squashfs"
++	if _, err := os.Stat(squashfsImg); err != nil {
++		return "", func() {}
++	}
++	mountPoint := "/tmp/dbx-iso-nix-store"
++	if err := os.MkdirAll(mountPoint, 0755); err != nil {
++		return "", func() {}
++	}
++	cmd := exec.Command("mount", "-t", "squashfs", "-o", "loop,ro", squashfsImg, mountPoint)
++	if err := cmd.Run(); err != nil {
++		log.Printf("Failed to mount ISO nix-store.squashfs: %v", err)
++		return "", func() {}
++	}
++
++	// Register paths from the squashfs into the nix daemon database.
++	regFile := mountPoint + "/nix-path-registration"
++	if reg, err := os.Open(regFile); err == nil {
++		loadDB := exec.Command("nix-store", "--load-db")
++		loadDB.Stdin = reg
++		if err := loadDB.Run(); err != nil {
++			log.Printf("Warning: failed to load nix path registration: %v", err)
++		}
++		reg.Close()
++	}
++
++	return mountPoint, func() {
++		_ = exec.Command("umount", mountPoint).Run()
++	}
++}
++
+ func create_t6_boot(disk string, bootMediaDisk dogeboxd.SystemDisk, partitionPrefix string) {
+ 	// Create partition table
+ 	utils.RunParted(disk, "mklabel", "gpt")
