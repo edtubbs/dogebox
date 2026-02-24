@@ -187,13 +187,35 @@ rec {
           isBaseBuilder = false;
           devMode = isOSDeveloperMode;
           devBootloader = false;
+          specialArgs = getSpecialArgs arch system builderType devMode devBootloader;
+          configModules = mkConfigModules { inherit system builderType isBaseBuilder; };
+
+          # Build the target system (what gets installed to disk).
+          # For ISO builds, this is baked into the ISO for offline, deterministic installs.
+          targetSystem = nixpkgs.lib.nixosSystem {
+            inherit system;
+            modules = configModules;
+            inherit specialArgs;
+          };
+          targetToplevel = targetSystem.config.system.build.toplevel;
         in
         nixos-generators.nixosGenerate {
           inherit system format;
-          modules = [
-            builderSpecificModule
-          ] ++ (mkConfigModules { inherit system builderType isBaseBuilder; });
-          specialArgs = getSpecialArgs arch system builderType devMode devBootloader;
+          modules =
+            [
+              builderSpecificModule
+            ]
+            ++ configModules
+            ++ (nixpkgs.lib.optionals (format == "iso") [
+              (
+                { ... }:
+                {
+                  isoImage.storeContents = [ targetToplevel ];
+                  environment.etc."dogebox/target-toplevel".text = builtins.toString targetToplevel;
+                }
+              )
+            ]);
+          inherit specialArgs;
         };
 
       ## Development Scripts & tools below this point.
