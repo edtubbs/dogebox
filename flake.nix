@@ -135,13 +135,6 @@ rec {
               system.activationScripts.copyFlake = getCopyFlakeScript system self;
               system.activationScripts.setOpt = getSetOptScript builderType isBaseBuilder;
               system.activationScripts.versioning = versionScript;
-              system.activationScripts.writeTargetToplevel = ''
-                set -e
-                mkdir -p /etc/dogebox
-                tmp=$(mktemp /etc/dogebox/.target-toplevel.XXXXXX)
-                echo "$systemConfig" > "$tmp"
-                mv "$tmp" /etc/dogebox/target-toplevel
-              '';
             }
           )
         ];
@@ -201,10 +194,7 @@ rec {
           modules = [
             builderSpecificModule
           ] ++ (mkConfigModules { inherit system builderType isBaseBuilder; });
-          specialArgs = getSpecialArgs arch system builderType devMode devBootloader // {
-            targetToplevel =
-              self.nixosConfigurations."dogeboxos-${builderType}-${arch}".config.system.build.toplevel;
-          };
+          specialArgs = getSpecialArgs arch system builderType devMode devBootloader;
         };
 
       ## Development Scripts & tools below this point.

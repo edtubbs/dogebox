@@ -6,13 +6,12 @@ diff --git a/cmd/_dbxroot/cmd/install-to-disk.go b/cmd/_dbxroot/cmd/install-to-d
  		utils.RunCommand("chown", "dogeboxd:dogebox", "/mnt/opt/dbx-installed")
  
 -		systemClosure := utils.RunCommand("readlink", "-f", "/run/current-system");
-+		data, err := os.ReadFile("/etc/dogebox/target-toplevel")
-+		if err != nil {
-+			log.Fatalf("Failed to read target toplevel: %v", err)
-+		}
-+		systemClosure := strings.TrimSpace(string(data))
-+		if !strings.HasPrefix(systemClosure, "/nix/store/") {
-+			log.Fatalf("Invalid target toplevel path: %s", systemClosure)
++		// Use prebuilt target toplevel if available (ISO), otherwise current system.
++		var systemClosure string
++		if data, err := os.ReadFile("/etc/dogebox/target-toplevel"); err == nil {
++			systemClosure = strings.TrimSpace(string(data))
++		} else {
++			systemClosure = strings.TrimSpace(utils.RunCommand("readlink", "-f", "/run/current-system"))
 +		}
  
  		// Install
