@@ -195,20 +195,35 @@ rec {
               builderSpecificModule
             ]
             ++ (mkConfigModules { inherit system builderType isBaseBuilder; })
-            ++ (nixpkgs.lib.optionals (format == "iso") [
-              (
-                let
-                  # Matches nixosConfigurations."dogeboxos-${builderType}-${arch}" defined below.
-                  targetToplevel =
-                    self.nixosConfigurations."dogeboxos-${builderType}-${arch}".config.system.build.toplevel;
-                in
-                { ... }:
-                {
-                  isoImage.storeContents = [ targetToplevel ];
-                  environment.etc."dogebox/target-toplevel".text = "${targetToplevel}";
-                }
-              )
-            ]);
+            ++ (
+              if (format == "iso") then
+                [
+                  (
+                    let
+                      # Matches nixosConfigurations."dogeboxos-${builderType}-${arch}" defined below.
+                      targetToplevel =
+                        self.nixosConfigurations."dogeboxos-${builderType}-${arch}".config.system.build.toplevel;
+                    in
+                    { ... }:
+                    {
+                      isoImage.storeContents = [ targetToplevel ];
+                      environment.etc."dogebox/target-toplevel".text = "${targetToplevel}";
+                    }
+                  )
+                ]
+              else
+                [
+                  (
+                    { ... }:
+                    {
+                      system.activationScripts.writeTargetToplevel = ''
+                        mkdir -p /etc/dogebox
+                        echo "$systemConfig" > /etc/dogebox/target-toplevel
+                      '';
+                    }
+                  )
+                ]
+            );
           specialArgs = getSpecialArgs arch system builderType devMode devBootloader;
         };
 
