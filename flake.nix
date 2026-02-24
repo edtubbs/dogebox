@@ -136,6 +136,7 @@ rec {
               system.activationScripts.setOpt = getSetOptScript builderType isBaseBuilder;
               system.activationScripts.versioning = versionScript;
               system.activationScripts.writeTargetToplevel = ''
+                set -e
                 mkdir -p /etc/dogebox
                 tmp=$(mktemp /etc/dogebox/.target-toplevel.XXXXXX)
                 echo "$systemConfig" > "$tmp"
