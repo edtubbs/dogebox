@@ -218,7 +218,9 @@ rec {
                     {
                       system.activationScripts.writeTargetToplevel = ''
                         mkdir -p /etc/dogebox
-                        echo "$systemConfig" > /etc/dogebox/target-toplevel
+                        tmp=$(mktemp /etc/dogebox/.target-toplevel.XXXXXX)
+                        echo "$systemConfig" > "$tmp"
+                        mv "$tmp" /etc/dogebox/target-toplevel
                       '';
                     }
                   )
