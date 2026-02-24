@@ -211,7 +211,7 @@ rec {
                 { ... }:
                 {
                   isoImage.storeContents = [ targetToplevel ];
-                  environment.etc."dogebox/target-toplevel".text = builtins.toString targetToplevel;
+                  environment.etc."dogebox/target-toplevel".text = "${targetToplevel}";
                 }
               )
             ]);
