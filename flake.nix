@@ -201,7 +201,10 @@ rec {
           modules = [
             builderSpecificModule
           ] ++ (mkConfigModules { inherit system builderType isBaseBuilder; });
-          specialArgs = getSpecialArgs arch system builderType devMode devBootloader;
+          specialArgs = getSpecialArgs arch system builderType devMode devBootloader // {
+            targetToplevel =
+              self.nixosConfigurations."dogeboxos-${builderType}-${arch}".config.system.build.toplevel;
+          };
         };
 
       ## Development Scripts & tools below this point.
