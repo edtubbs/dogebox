@@ -196,12 +196,24 @@
   systemd.services."serial-getty@ttyS2" = {
     enable = true;
     wantedBy = [ "getty.target" ];
-    serviceConfig.Restart = "always";
+    serviceConfig = {
+      Restart = "always";
+      ExecStart = lib.mkForce [
+        ""
+        "${pkgs.util-linux}/bin/agetty -o '-p -- \\\\u' --keep-baud 1500000,115200,57600,38400,9600 ttyS2 $TERM"
+      ];
+    };
   };
   systemd.services."serial-getty@ttyS0" = {
     enable = true;
     wantedBy = [ "getty.target" ];
-    serviceConfig.Restart = "always";
+    serviceConfig = {
+      Restart = "always";
+      ExecStart = lib.mkForce [
+        ""
+        "${pkgs.util-linux}/bin/agetty -o '-p -- \\\\u' --keep-baud 1500000,115200,57600,38400,9600 ttyS0 $TERM"
+      ];
+    };
   };
   system.activationScripts.rk3588-firmware = ''
     mkdir -p /etc/firmware
