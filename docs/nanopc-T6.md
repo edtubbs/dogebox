@@ -69,7 +69,7 @@ For the current NanoPC-T6 image path, the kernel comes from `nabam/nixos-rockchi
 
 1. Keep mainline/nabam kernel and align reset configuration with FriendlyARM semantics.
 2. Keep OP-TEE `firmware`/`reserved-memory` nodes in DTS patch.
-3. Mirror FriendlyARM reset semantics by setting `pmic-reset-func = <1>` in DTS and patching `rk8xx-core.c` to follow FriendlyARM `rk806-core.c` reset configuration behavior (`pmic-reset-func`, default `0` when missing).
+3. Patch in the full FriendlyARM `rk806-core.c` module stack on top of the nabam kernel path (including `rk806-core.c`, `rk806.h`, and RK806 SPI wiring), while keeping `pmic-reset-func = <1>` in DTS.
 
 ### 3. Mask ROM Button (SARADC)
 
