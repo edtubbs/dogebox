@@ -46,6 +46,7 @@
   # Enable both video and serial console output.
   # The rk3588 debug UART (UART2) is accessible via the USB-C debug port.
   # Depending on kernel/device-tree aliasing it may appear as ttyS2 or ttyS0.
+  # FriendlyARM's kernel exposes this console as ttyFIQ0.
   # earlycon provides serial output during early boot before the full
   # UART driver loads; keep_bootcon keeps earlycon active alongside the
   # real console so no output is lost during the transition.
@@ -59,6 +60,7 @@
     "console=tty1"
     "console=ttyS2,1500000"
     "console=ttyS0,1500000"
+    "console=ttyFIQ0,1500000"
   ];
 
   # Use the extlinux boot loader. (NixOS wants to enable GRUB by default)
@@ -199,6 +201,11 @@
     serviceConfig.Restart = "always";
   };
   systemd.services."serial-getty@ttyS0" = {
+    enable = true;
+    wantedBy = [ "getty.target" ];
+    serviceConfig.Restart = "always";
+  };
+  systemd.services."serial-getty@ttyFIQ0" = {
     enable = true;
     wantedBy = [ "getty.target" ];
     serviceConfig.Restart = "always";
