@@ -70,7 +70,7 @@
   boot.loader.timeout = 1;
 
   boot.kernelPackages =
-    inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_unstable;
+    inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_stable;
 
   boot.kernelPatches = [
     {
