@@ -88,10 +88,6 @@
             name = "rk806-friendlyarm-reset-compat.patch";
             patch = ./rk806-friendlyarm-reset-compat.patch;
           }
-          {
-            name = "rk806-disable-slave-restart.patch";
-            patch = ./rk806-disable-slave-restart.patch;
-          }
         ];
       });
     in
