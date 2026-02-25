@@ -67,9 +67,9 @@ For the current NanoPC-T6 image path, the kernel comes from `nabam/nixos-rockchi
 
 **Current approach**:
 
-1. Keep mainline/nabam kernel and apply RK806 `SLAVE_RESTART_FUN` disable patch.
+1. Keep mainline/nabam kernel and align reset configuration with FriendlyARM semantics.
 2. Keep OP-TEE `firmware`/`reserved-memory` nodes in DTS patch.
-3. Mirror FriendlyARM reset semantics by setting `pmic-reset-func = <1>` in DTS and adding a compatibility kernel patch so mainline also reads that property when `rockchip,reset-mode` is absent.
+3. Mirror FriendlyARM reset semantics by setting `pmic-reset-func = <1>` in DTS and adding a compatibility kernel patch that prefers `pmic-reset-func` (falls back to `rockchip,reset-mode`, defaults to mode `0` if neither is set).
 
 ### 3. Mask ROM Button (SARADC)
 
@@ -85,7 +85,7 @@ This system uses `nabam/nixos-rockchip`'s mainline kernel track for NanoPC-T6.
 
 Key differences:
 - **Mainline kernel**: `rk8xx-core.c` unconditionally creates pwrkey MFD cell for RK806. Unconditionally enables `SLAVE_RESTART_FUN` in pre_init_reg. Reset mode configured via `rockchip,reset-mode` DT property.
-- **FriendlyARM kernel**: `rk806-core.c` requires an explicit `pwrkey { status = "okay"; }` DT node. Does NOT enable `SLAVE_RESTART_FUN`. Reset mode configured via `pmic-reset-func` DT property.
+- **FriendlyARM kernel**: `rk806-core.c` requires an explicit `pwrkey { status = "okay"; }` DT node and configures reset mode via `pmic-reset-func` DT property.
 
 ### Previous Incorrect Approaches
 
