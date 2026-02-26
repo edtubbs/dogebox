@@ -85,8 +85,12 @@
             patch = ./rk3588-nanopc-t6.dtsi.patch;
           }
           {
-            name = "rk806-full-module.patch";
-            patch = ./rk806-full-module.patch;
+            name = "rk806-friendlyarm-reset-compat.patch";
+            patch = ./rk806-friendlyarm-reset-compat.patch;
+          }
+          {
+            name = "rk806-disable-slave-restart.patch";
+            patch = ./rk806-disable-slave-restart.patch;
           }
         ];
       });
