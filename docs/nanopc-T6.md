@@ -36,3 +36,9 @@ Documentation used for NixOS/Dogebox support:
 
 https://github.com/friendlyarm/sd-fuse_rk3588.git
 prebuilt/firmware/install.sh
+
+## OP-TEE
+
+Dogebox's NanoPC-T6 OP-TEE build enables Rockchip secure boot PTA support
+(`CFG_RK_SECURE_BOOT=y`) so secure boot fuse management can be driven through
+OP-TEE.

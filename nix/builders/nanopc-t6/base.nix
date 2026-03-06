@@ -18,6 +18,7 @@
           "CFG_TEE_CORE_LOG_LEVEL=0"
           "CFG_ATTESTATION_PTA=y"
           "CFG_ATTESTATION_PTA_KEY_SIZE=1024"
+          "CFG_RK_SECURE_BOOT=y"
           "CFG_WITH_USER_TA=y"
           "CFG_WITH_SOFTWARE_PRNG=n"
         ];
