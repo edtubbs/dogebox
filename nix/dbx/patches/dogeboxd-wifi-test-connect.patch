@@ -1,0 +1,34 @@
+diff --git a/cmd/_dbxroot/cmd/wifi-test-connect.go b/cmd/_dbxroot/cmd/wifi-test-connect.go
+index a5459f3..57d418c 100644
+--- a/cmd/_dbxroot/cmd/wifi-test-connect.go
++++ b/cmd/_dbxroot/cmd/wifi-test-connect.go
+@@ -40,6 +40,12 @@ func init() {
+ }
+ 
+ func testWifiConnect(iface string, ssid string, password string) error {
++	stopCreateAPCmd := exec.Command("systemctl", "stop", "create_ap.service")
++	if out, err := stopCreateAPCmd.CombinedOutput(); err != nil {
++		// Non-fatal: we still attempt to connect in case create_ap is not present.
++		log.Printf("warning: failed to stop create_ap.service: %v (%s)", err, strings.TrimSpace(string(out)))
++	}
++
+ 	cmd := exec.Command("wpa_supplicant",
+ 		"-i", iface,
+ 		"-C", "/var/run/wpa_supplicant",
+@@ -69,7 +75,7 @@ func testWifiConnect(iface string, ssid string, password string) error {
+ 		return err
+ 	}
+ 
+-	id := string(networkID)
++	id := strings.TrimSpace(string(networkID))
+ 
+ 	setSSIDCmd := exec.Command("wpa_cli", "-i", iface, "set_network", id, "ssid", fmt.Sprintf("\"%s\"", ssid))
+ 	err = setSSIDCmd.Run()
+@@ -110,6 +116,7 @@ func testWifiConnect(iface string, ssid string, password string) error {
+ 		log.Printf("Successfully connected to WiFi network: %s", ssid)
+ 	} else {
+ 		log.Printf("Failed to connect to WiFi network: %s. Current status: %s", ssid, status)
++		return fmt.Errorf("wpa_supplicant did not reach connected state")
+ 	}
+ 
+ 	return nil
