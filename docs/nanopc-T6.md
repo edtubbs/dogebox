@@ -59,3 +59,8 @@ Involvement in Dogebox is:
 
 So enabling the PTA in Dogebox exposes the secure-world API needed for secure
 boot provisioning; it is not invoked automatically unless a client calls it.
+
+That means the OS does **not** strictly need to be the client. U-Boot can be
+the client, or Linux userspace can be the client. If secure-boot provisioning
+is intended to happen after Linux boots, then Dogebox OS needs a TEEC client
+tool for these PTA commands.
