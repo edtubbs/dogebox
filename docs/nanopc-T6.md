@@ -42,3 +42,20 @@ prebuilt/firmware/install.sh
 Dogebox's NanoPC-T6 OP-TEE build enables Rockchip secure boot PTA support
 (`CFG_RK_SECURE_BOOT=y`) so secure boot fuse management can be driven through
 OP-TEE.
+
+The Rockchip secure boot feature here is implemented as an OP-TEE pseudo TA
+(`core/pta/rockchip/rk_secure_boot.c` upstream), with command handlers for:
+
+- `PTA_RK_SECURE_BOOT_GET_INFO`
+- `PTA_RK_SECURE_BOOT_BURN_HASH`
+- `PTA_RK_SECURE_BOOT_LOCKDOWN_DEVICE`
+
+Involvement in Dogebox is:
+
+1. NanoPC-T6 boots with BL31 + OP-TEE (`tee.bin`) + U-Boot.
+2. `CFG_RK_SECURE_BOOT=y` compiles and registers `rk_secure_boot.pta` in OP-TEE.
+3. A normal-world client (bootloader or userspace TEEC client) opens the PTA
+   UUID and invokes the commands above to read/burn/lock secure-boot OTP state.
+
+So enabling the PTA in Dogebox exposes the secure-world API needed for secure
+boot provisioning; it is not invoked automatically unless a client calls it.
