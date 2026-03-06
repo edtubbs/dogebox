@@ -64,3 +64,7 @@ That means the OS does **not** strictly need to be the client. U-Boot can be
 the client, or Linux userspace can be the client. If secure-boot provisioning
 is intended to happen after Linux boots, then Dogebox OS needs a TEEC client
 tool for these PTA commands.
+
+Within Dogebox-WG projects, that OS-side client should live in
+`dogeboxd` (or a `dogeboxd` root helper), since `dogeboxd` owns host-level
+system orchestration and privileged operations.
