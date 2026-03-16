@@ -28,7 +28,7 @@ rec {
     };
 
     dkm = {
-      url = "github:dogebox-wg/dkm/copilot/update-dkm-seedphrase-storage";
+      url = "github:edtubbs/dkm/copilot/update-dkm-seedphrase-storage";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
