@@ -69,8 +69,7 @@ For the current NanoPC-T6 image path, the kernel comes from `nabam/nixos-rockchi
 
 1. Keep mainline/nabam kernel and align reset configuration with FriendlyARM semantics.
 2. Keep OP-TEE `firmware`/`reserved-memory` nodes in DTS patch.
-3. Mirror FriendlyARM reset semantics by setting `pmic-reset-func = <1>` in DTS and applying focused RK806 compatibility patches in `rk8xx-core.c`.
-4. Backport U-Boot commit `1961bba4bc34` (`power: rk8xx: allow to customize RK806 reset mode`) so `rockchip,reset-mode` is applied in bootloader PMIC init too.
+3. Apply focused RK806 compatibility patches in Linux `rk8xx-core.c` so `rockchip,reset-mode` is honored there and defaults to mode `2` when the property is missing (matching the U-Boot commit behavior).
 
 ### 3. Mask ROM Button (SARADC)
 
