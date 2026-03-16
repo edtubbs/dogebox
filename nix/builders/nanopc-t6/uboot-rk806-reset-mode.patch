@@ -1,0 +1,102 @@
+From 1961bba4bc341573db98a6fd34eac771e914681f Mon Sep 17 00:00:00 2001
+From: Quentin Schulz <quentin.schulz@cherry.de>
+Date: Wed, 13 Aug 2025 16:07:43 +0200
+Subject: [PATCH] power: rk8xx: allow to customize RK806 reset mode
+
+The RK806 PMIC has a bitfield for configuring the restart/reset behavior
+(which I assume Rockchip calls "function") whenever the PMIC is reset
+either programmatically (c.f. DEV_RST in the datasheet) or via PWRCTRL
+or RESETB pins.
+
+For RK806, the following values are possible for RST_FUN:
+
+0b00 means "Restart PMU"
+0b01 means "Reset all the power off reset registers, forcing
+the state to switch to ACTIVE mode"
+0b10 means "Reset all the power off reset registers, forcing
+the state to switch to ACTIVE mode, and simultaneously
+pull down the RESETB PIN for 5mS before releasing"
+0b11 means the same as for 0b10 just above.
+
+This adds the appropriate logic in the driver to parse the new
+rockchip,reset-mode DT property to pass this information. It just
+happens that the values in the binding match the values to write in the
+bitfield so no mapping is necessary.
+
+For backward compatibility reasons, if the property is missing we set it
+to 0b10 (i.e. BIT(7)) like before this commit was merged instead of
+leaving it untouched like in the kernel driver.
+
+Note that this does nothing useful for U-Boot at the moment as the ways
+to reset the device (e.g. via `reset` command) doesn't interact with the
+RK8xx PMIC and simply does a CPU reset.
+Considering the upstream Linux kernel left this register untouched until
+(assumed) v6.17[1], this is useful for cases in which the U-Boot
+bootloader has this patch (and running with a DT with
+rockchip,reset-mode property set) and running an upstream kernel before
+(assumed) v6.17, or alternatively later without the property in the
+kernel DT.
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/lee/mfd.git/commit/?id=87b48d86b77686013f5c2a8866ed299312b671db
+
+Signed-off-by: Quentin Schulz <quentin.schulz@cherry.de>
+Reviewed-by: Kever Yang <kever.yang@rock-chips.com>
+---
+ drivers/power/pmic/rk8xx.c | 21 ++++++++++++---------
+ include/power/rk8xx_pmic.h |  2 ++
+ 2 files changed, 14 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/power/pmic/rk8xx.c b/drivers/power/pmic/rk8xx.c
+index 3bc696d4caaa..d11f7a7886e8 100644
+--- a/drivers/power/pmic/rk8xx.c
++++ b/drivers/power/pmic/rk8xx.c
+@@ -89,11 +89,6 @@ void rk8xx_off_for_plugin(struct udevice *dev)
+ }
+ }
+ 
+-static struct reg_data rk806_init_reg[] = {
+-/* RST_FUN */
+-{ RK806_REG_SYS_CFG3, BIT(7), GENMASK(7, 6)},
+-};
+-
+ static struct reg_data rk817_init_reg[] = {
+ /* enable the under-voltage protection,
+  * the under-voltage protection will shutdown the LDO3 and reset the PMIC
+@@ -306,12 +301,20 @@ static int rk8xx_probe(struct udevice *dev)
+ value = (power_en2 & 0x0f) | ((power_en3 & 0x0f) << 4);
+ pmic_reg_write(dev, RK817_POWER_EN_SAVE1, value);
+ break;
+-case RK806_ID:
++case RK806_ID: {
++u32 rst_fun = 2;
++
+ on_source = RK806_ON_SOURCE;
+ off_source = RK806_OFF_SOURCE;
+-init_data = rk806_init_reg;
+-init_data_num = ARRAY_SIZE(rk806_init_reg);
+-break;
++
++ret = dev_read_u32(dev, "rockchip,reset-mode", &rst_fun);
++if (ret)
++debug("rockchip,reset-mode property missing, defaulting to %d\n",
++      rst_fun);
++
++pmic_clrsetbits(dev, RK806_REG_SYS_CFG3, RK806_RST_FUN_MSK,
++FIELD_PREP(RK806_RST_FUN_MSK, rst_fun));
++break; }
+ default:
+ printf("Unknown PMIC: RK%x!!\n", show_variant);
+ return -EINVAL;
+diff --git a/include/power/rk8xx_pmic.h b/include/power/rk8xx_pmic.h
+index 31221aa46b60..913b6ebe6d96 100644
+--- a/include/power/rk8xx_pmic.h
++++ b/include/power/rk8xx_pmic.h
+@@ -212,6 +212,8 @@ enum {
+ #define RK817_POWER_EN_SAVE00x99
+ #define RK817_POWER_EN_SAVE10xa4
+ 
++#define RK806_RST_FUN_MSKGENMASK(7, 6)
++
+ #define RK806_POWER_EN(x)(0x00 + (x))
+ /* POWER_ENx register lower 4 bits are write-protected unless the associated top bit is set */
+ #define RK806_POWER_EN_CLRSETBITS(bit, val)(((val) << (bit)) | (1 << ((bit) + 4)))

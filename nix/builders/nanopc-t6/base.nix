@@ -30,6 +30,12 @@
       uBootNanoPCT6 = super.buildUBoot {
         defconfig = "nanopc-t6-rk3588_defconfig";
         extraMeta.platforms = [ "aarch64-linux" ];
+        postPatch = ''
+          # Backport U-Boot RK806 reset-mode support only when missing.
+          if ! grep -q "RK806_RST_FUN_MSK" include/power/rk8xx_pmic.h; then
+            patch -p1 < ${./uboot-rk806-reset-mode.patch}
+          fi
+        '';
         extraMakeFlags = [
           "BL31=${pkgs.armTrustedFirmwareRK3588}/bl31.elf"
           "ROCKCHIP_TPL=${pkgs.rkbin.TPL_RK3588}"
