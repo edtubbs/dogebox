@@ -11,13 +11,21 @@
 let
   opteeOsRockchip = lib.attrByPath [ "optee-os-rockchip-rk3588" ] null pkgs;
   hasOpteeOs = opteeOsRockchip != null;
-  libdogecoinOpteeTa = lib.attrByPath [
+  libdogecoinOpteeTaCandidate = lib.attrByPath [
     "dogebox-nur-packages"
     "legacyPackages"
     pkgs.system
     "libdogecoin"
     "libdogecoin-optee-ta"
   ] null inputs;
+  libdogecoinOpteeTaPath =
+    if !hasOpteeOs || libdogecoinOpteeTaCandidate == null then
+      null
+    else
+      let
+        taPath = "${libdogecoinOpteeTaCandidate}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta";
+      in
+      if (builtins.tryEval taPath).success then taPath else null;
 in
 {
   users.users.dkm = {
@@ -52,8 +60,8 @@ in
         "${opteeOsRockchip.devkit}/ta/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c.ta"
         "${opteeOsRockchip.devkit}/ta/fd02c9da-306c-48c7-a49c-bbd827ae86ee.ta"
       ]
-      ++ lib.optionals (libdogecoinOpteeTa != null) [
-        "${libdogecoinOpteeTa}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
+      ++ lib.optionals (libdogecoinOpteeTaPath != null) [
+        libdogecoinOpteeTaPath
       ];
   };
 }
