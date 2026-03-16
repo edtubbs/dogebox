@@ -72,7 +72,7 @@
     let
       # Use nabam's mainline-based rockchip kernel (linux_latest with rockchip config).
       # Merge our RK806 options and append compatibility patches directly.
-      baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_unstable;
+      baseKernel = inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip or inputs.rockchip.legacyPackages.aarch64-linux.kernel_linux_latest_rockchip_unstable;
       customKernel = baseKernel.kernel.override (prev: {
         structuredExtraConfig = (prev.structuredExtraConfig or {}) // (with lib.kernel; {
           MFD_RK8XX_SPI = yes;        # RK806 PMIC MFD driver via SPI
@@ -87,6 +87,10 @@
           {
             name = "rk806-friendlyarm-reset-compat.patch";
             patch = ./rk806-friendlyarm-reset-compat.patch;
+          }
+          {
+            name = "rk806-disable-slave-restart.patch";
+            patch = ./rk806-disable-slave-restart.patch;
           }
         ];
       });
