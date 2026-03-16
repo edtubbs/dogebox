@@ -289,7 +289,7 @@ DKM is a **system-level service** that needs tee-supplicant running at the syste
 
 ### System-Level Configuration (For DKM)
 
-Add to **`Dogebox-WG/os`** repository in file **`nix/dbx/dkm.nix`**:
+Add to this repository file **`nix/dbx/dkm.nix`**:
 
 ```nix
 { config, pkgs, lib, ... }:
@@ -346,7 +346,7 @@ Individual pups also configure tee-supplicant in their `pup.nix` files if they n
 
 | Component | Level | Configure In | Purpose |
 |-----------|-------|--------------|---------|
-| DKM | System | `Dogebox-WG/os` → `nix/dbx/dkm.nix` | DKM service uses OP-TEE |
+| DKM | System | `nix/dbx/dkm.nix` | DKM service uses OP-TEE |
 | Pups | Container | Each pup's `pup.nix` | Pup uses OP-TEE in container |
 
 Both can coexist without conflict because they operate at different isolation levels.
