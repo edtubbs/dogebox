@@ -4,7 +4,6 @@
   pkgs,
   dkm,
   devMode,
-  inputs,
   ...
 }:
 
