@@ -27,7 +27,8 @@ in
 
   systemd.services.dkm = {
     enable = !devMode;
-    after = [ "network.target" ];
+    after = [ "network.target" ] ++ lib.optionals hasOpteeOs [ "tee-supplicant.service" ];
+    requires = lib.optionals hasOpteeOs [ "tee-supplicant.service" ];
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
