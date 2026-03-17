@@ -15,6 +15,10 @@ let
   libdogecoinOpteeTaPath = "${libdogecoinFromNur.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta";
 in
 {
+  environment.systemPackages = lib.optionals hasOpteeOs [
+    libdogecoinFromNur.libdogecoin-optee-host
+  ];
+
   users.users.dkm = {
     isSystemUser = true;
     group = "dogebox";
@@ -29,6 +33,7 @@ in
     enable = !devMode;
     after = [ "network.target" ] ++ lib.optionals hasOpteeOs [ "tee-supplicant.service" ];
     requires = lib.optionals hasOpteeOs [ "tee-supplicant.service" ];
+    path = lib.optionals hasOpteeOs [ libdogecoinFromNur.libdogecoin-optee-host ];
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
