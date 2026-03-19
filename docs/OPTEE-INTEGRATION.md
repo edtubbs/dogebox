@@ -205,7 +205,7 @@ Example `tee-supplicant` configuration (NixOS):
 services.tee-supplicant = {
   enable = true;
   trustedApplications = [
-    "${libdogecoin."libdogecoin-optee-ta"}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
+    "${libdogecoin.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
   ];
 };
 ```
@@ -283,9 +283,17 @@ This ensures DKM works whether OP-TEE is present or not.
 
 DKM is a **system-level service** that needs tee-supplicant running at the system level to use OP-TEE. Pups are containerized applications that may also need their own tee-supplicant inside their containers.
 
-**No conflict exists because:**
-- System-level tee-supplicant serves DKM (host service)
-- Container-level tee-supplicant serves pups (isolated containers)
+**Important:** container isolation does **not** isolate libdogecoin mnemonic state inside OP-TEE.  
+For the same device + TA UUID, the secure storage namespace is shared across callers (host and pups), so generating/replacing a mnemonic from one context can overwrite what another context sees.
+
+**What is isolated vs shared:**
+- Isolated: Linux userspace process/container environment
+- Shared: OP-TEE secure storage for the same TA UUID (`62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4`)
+
+Recommended operational model:
+- Let one component own mnemonic creation (typically host DKM)
+- Pups should use derivation/delegation operations against the existing mnemonic
+- Avoid running mnemonic generation in both host and pup contexts
 
 ### System-Level Configuration (For DKM)
 
@@ -307,7 +315,7 @@ Add to this repository file **`nix/dbx/dkm.nix`**:
       "${pkgs.optee-os-rockchip-rk3588.devkit}/ta/fd02c9da-306c-48c7-a49c-bbd827ae86ee.ta"
       
       # libdogecoin OP-TEE Trusted Application (for DKM operations)
-      "${libdogecoin."libdogecoin-optee-ta"}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
+      "${libdogecoin.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
     ];
   };
 }
@@ -334,7 +342,7 @@ Individual pups also configure tee-supplicant in their `pup.nix` files if they n
       "${pkgs.optee-os-rockchip-rk3588.devkit}/ta/80a4c275-0a47-4905-8285-1486a9771a08.ta"
       "${pkgs.optee-os-rockchip-rk3588.devkit}/ta/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c.ta"
       "${pkgs.optee-os-rockchip-rk3588.devkit}/ta/fd02c9da-306c-48c7-a49c-bbd827ae86ee.ta"
-      "${libdogecoin."libdogecoin-optee-ta"}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
+      "${libdogecoin.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
     ];
   };
 }
@@ -349,7 +357,7 @@ Individual pups also configure tee-supplicant in their `pup.nix` files if they n
 | DKM | System | `nix/dbx/dkm.nix` | DKM service uses OP-TEE |
 | Pups | Container | Each pup's `pup.nix` | Pup uses OP-TEE in container |
 
-Both can coexist without conflict because they operate at different isolation levels.
+Both can coexist as services, but **mnemonic storage is shared in OP-TEE** for the same TA UUID.
 
 ### Trusted Applications
 
