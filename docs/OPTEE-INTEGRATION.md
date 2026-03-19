@@ -205,7 +205,7 @@ Example `tee-supplicant` configuration (NixOS):
 services.tee-supplicant = {
   enable = true;
   trustedApplications = [
-    "${libdogecoin.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
+    "${libdogecoinFromNur.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
   ];
 };
 ```
@@ -300,7 +300,11 @@ Recommended operational model:
 Add to this repository file **`nix/dbx/dkm.nix`**:
 
 ```nix
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
+let
+  opteeOsRockchip = lib.attrByPath [ "optee-os-rockchip-rk3588" ] null pkgs;
+  libdogecoinFromNur = pkgs.callPackage "${inputs.dogebox-nur-packages}/pkgs/libdogecoin/default.nix" { };
+in
 {
   # ... existing DKM service configuration ...
   
@@ -309,13 +313,13 @@ Add to this repository file **`nix/dbx/dkm.nix`**:
     enable = true;
     trustedApplications = [
       # OP-TEE OS standard TAs for RK3588 platform
-      "${pkgs.optee-os-rockchip-rk3588.devkit}/ta/023f8f1a-292a-432b-8fc4-de8471358067.ta"
-      "${pkgs.optee-os-rockchip-rk3588.devkit}/ta/80a4c275-0a47-4905-8285-1486a9771a08.ta"
-      "${pkgs.optee-os-rockchip-rk3588.devkit}/ta/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c.ta"
-      "${pkgs.optee-os-rockchip-rk3588.devkit}/ta/fd02c9da-306c-48c7-a49c-bbd827ae86ee.ta"
+      "${opteeOsRockchip.devkit}/ta/023f8f1a-292a-432b-8fc4-de8471358067.ta"
+      "${opteeOsRockchip.devkit}/ta/80a4c275-0a47-4905-8285-1486a9771a08.ta"
+      "${opteeOsRockchip.devkit}/ta/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c.ta"
+      "${opteeOsRockchip.devkit}/ta/fd02c9da-306c-48c7-a49c-bbd827ae86ee.ta"
       
       # libdogecoin OP-TEE Trusted Application (for DKM operations)
-      "${libdogecoin.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
+      "${libdogecoinFromNur.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
     ];
   };
 }
@@ -342,7 +346,7 @@ Individual pups also configure tee-supplicant in their `pup.nix` files if they n
       "${pkgs.optee-os-rockchip-rk3588.devkit}/ta/80a4c275-0a47-4905-8285-1486a9771a08.ta"
       "${pkgs.optee-os-rockchip-rk3588.devkit}/ta/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c.ta"
       "${pkgs.optee-os-rockchip-rk3588.devkit}/ta/fd02c9da-306c-48c7-a49c-bbd827ae86ee.ta"
-      "${libdogecoin.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
+      "${libdogecoinFromNur.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
     ];
   };
 }
