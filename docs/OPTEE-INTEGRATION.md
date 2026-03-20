@@ -368,6 +368,18 @@ Both can coexist as services, but **mnemonic storage is shared in OP-TEE** for t
 - **Standard OP-TEE TAs**: Platform-specific TAs from optee-os-rockchip-rk3588
 - **libdogecoin TA** (UUID: 62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4): The secure enclave for DKM/pup operations
 
+### Should Dogebox Use Separate Host/Pup libdogecoin TAs?
+
+Short answer: not in the current architecture.
+
+- OP-TEE secure storage is scoped to TA identity (UUID), not Linux container boundaries
+- Host and pups currently use the same libdogecoin TA UUID, so they share the same mnemonic state
+- Building true host/pup separation would require libdogecoin TA variants with distinct UUIDs and matching host-side tooling support
+
+Until libdogecoin provides that multi-UUID workflow, the recommended model is:
+- one mnemonic owner (typically host DKM), and
+- pup isolation via delegated/derived key paths (`m/1000'/2'/N'`)
+
 ### Platform Support
 
 This configuration is specific to:
