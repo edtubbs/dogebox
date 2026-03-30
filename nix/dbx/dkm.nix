@@ -11,8 +11,8 @@
 let
   opteeOsRockchip = lib.attrByPath [ "optee-os-rockchip-rk3588" ] null pkgs;
   hasOpteeOs = opteeOsRockchip != null;
-  libdogecoinFromNur = pkgs.callPackage "${inputs.dogebox-nur-packages}/pkgs/libdogecoin/default.nix" { };
-  libdogecoinOpteeTaPath = "${libdogecoinFromNur.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta";
+  libdogecoinFromNur =
+    if hasOpteeOs then pkgs.callPackage "${inputs.dogebox-nur-packages}/pkgs/libdogecoin/default.nix" { } else null;
 in
 {
   environment.systemPackages = lib.optionals hasOpteeOs [
@@ -52,7 +52,7 @@ in
         "${opteeOsRockchip.devkit}/ta/80a4c275-0a47-4905-8285-1486a9771a08.ta"
         "${opteeOsRockchip.devkit}/ta/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c.ta"
         "${opteeOsRockchip.devkit}/ta/fd02c9da-306c-48c7-a49c-bbd827ae86ee.ta"
-        libdogecoinOpteeTaPath
+        "${libdogecoinFromNur.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta"
       ];
   };
 }
