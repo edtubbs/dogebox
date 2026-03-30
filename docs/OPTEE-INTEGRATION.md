@@ -303,7 +303,9 @@ Add to this repository file **`nix/dbx/dkm.nix`**:
 { config, pkgs, lib, inputs, ... }:
 let
   opteeOsRockchip = lib.attrByPath [ "optee-os-rockchip-rk3588" ] null pkgs;
-  libdogecoinFromNur = pkgs.callPackage "${inputs.dogebox-nur-packages}/pkgs/libdogecoin/default.nix" { };
+  hasOpteeOs = opteeOsRockchip != null;
+  libdogecoinFromNur =
+    if hasOpteeOs then pkgs.callPackage "${inputs.dogebox-nur-packages}/pkgs/libdogecoin/default.nix" { } else null;
 in
 {
   # ... existing DKM service configuration ...
