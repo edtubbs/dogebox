@@ -34,7 +34,9 @@ in
   systemd.services.dkm = {
     enable = !devMode;
     after = [ "network.target" ] ++ lib.optionals hasOpteeOs [ "tee-supplicant.service" ];
+    wants = lib.optionals hasOpteeOs [ "tee-supplicant.service" ];
     requires = lib.optionals hasOpteeOs [ "tee-supplicant.service" ];
+    bindsTo = lib.optionals hasOpteeOs [ "tee-supplicant.service" ];
     path = lib.optionals hasOpteeOs [ libdogecoinFromNur.libdogecoin-optee-host ];
     wantedBy = [ "multi-user.target" ];
 
