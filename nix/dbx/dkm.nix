@@ -40,7 +40,7 @@ in
     serviceConfig = {
       ExecStartPre = lib.optionals hasOpteeOs [
         ''
-          ${pkgs.runtimeShell} -c 'until [ -f /lib/optee_armtz/${libdogecoinTaUuid}.ta ]; do sleep 1; done'
+          ${pkgs.runtimeShell} -c 'deadline=$((${pkgs.coreutils}/bin/date +%s + 1800)); while [ ! -f /lib/optee_armtz/${libdogecoinTaUuid}.ta ]; do if [ "$(${pkgs.coreutils}/bin/date +%s)" -ge "$deadline" ]; then echo "libdogecoin OP-TEE TA not installed at /lib/optee_armtz/${libdogecoinTaUuid}.ta after 1800s" >&2; exit 1; fi; ${pkgs.coreutils}/bin/sleep 1; done'
         ''
       ];
       ExecStart = "${dkm}/bin/dkm --dir /opt/dkm";
