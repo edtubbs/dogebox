@@ -12,8 +12,8 @@ let
   opteeOsRockchip = lib.attrByPath [ "optee-os-rockchip-rk3588" ] null pkgs;
   hasOpteeOs = opteeOsRockchip != null;
   libdogecoinTaUuid = "62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4";
-  # OP-TEE TA install/copy can lag significantly behind unit start on some boots.
-  libdogecoinTaWaitTimeoutSeconds = 1800;
+  # OP-TEE TA install/copy can lag behind unit start on some boots.
+  libdogecoinTaWaitTimeoutSeconds = 600;
   libdogecoinFromNur = pkgs.callPackage "${inputs.dogebox-nur-packages}/pkgs/libdogecoin/default.nix" { };
   libdogecoinOpteeTaPath = "${libdogecoinFromNur.libdogecoin-optee-ta}/ta/${libdogecoinTaUuid}.ta";
 in
