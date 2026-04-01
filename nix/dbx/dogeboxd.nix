@@ -50,8 +50,14 @@
 
   systemd.services.dogeboxd = {
     enable = !devMode;
-    after = [ "systemd-networkd-wait-online.service" ];
-    wants = [ "systemd-networkd-wait-online.service" ];
+    after = [
+      "systemd-networkd-wait-online.service"
+      "dkm.service"
+    ];
+    wants = [
+      "systemd-networkd-wait-online.service"
+      "dkm.service"
+    ];
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
