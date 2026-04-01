@@ -11,8 +11,9 @@
 let
   opteeOsRockchip = lib.attrByPath [ "optee-os-rockchip-rk3588" ] null pkgs;
   hasOpteeOs = opteeOsRockchip != null;
+  libdogecoinTaUuid = "62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4";
   libdogecoinFromNur = pkgs.callPackage "${inputs.dogebox-nur-packages}/pkgs/libdogecoin/default.nix" { };
-  libdogecoinOpteeTaPath = "${libdogecoinFromNur.libdogecoin-optee-ta}/ta/62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4.ta";
+  libdogecoinOpteeTaPath = "${libdogecoinFromNur.libdogecoin-optee-ta}/ta/${libdogecoinTaUuid}.ta";
 in
 {
   environment.systemPackages = lib.optionals hasOpteeOs [
@@ -37,6 +38,11 @@ in
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
+      ExecStartPre = lib.optionals hasOpteeOs [
+        ''
+          ${pkgs.runtimeShell} -c 'until [ -f /lib/optee_armtz/${libdogecoinTaUuid}.ta ]; do sleep 1; done'
+        ''
+      ];
       ExecStart = "${dkm}/bin/dkm --dir /opt/dkm";
       Restart = "always";
       User = "dkm";
