@@ -12,6 +12,7 @@ let
   opteeOsRockchip = lib.attrByPath [ "optee-os-rockchip-rk3588" ] null pkgs;
   hasOpteeOs = opteeOsRockchip != null;
   libdogecoinTaUuid = "62d95dc0-7fc2-4cb3-a7f3-c13ae4e633c4";
+  libdogecoinTaWaitTimeoutSeconds = 1800;
   libdogecoinFromNur = pkgs.callPackage "${inputs.dogebox-nur-packages}/pkgs/libdogecoin/default.nix" { };
   libdogecoinOpteeTaPath = "${libdogecoinFromNur.libdogecoin-optee-ta}/ta/${libdogecoinTaUuid}.ta";
 in
@@ -40,7 +41,7 @@ in
     serviceConfig = {
       ExecStartPre = lib.optionals hasOpteeOs [
         ''
-          ${pkgs.runtimeShell} -c 'deadline=$((${pkgs.coreutils}/bin/date +%s + 1800)); while [ ! -f /lib/optee_armtz/${libdogecoinTaUuid}.ta ]; do if [ "$(${pkgs.coreutils}/bin/date +%s)" -ge "$deadline" ]; then echo "libdogecoin OP-TEE TA not installed at /lib/optee_armtz/${libdogecoinTaUuid}.ta after 1800s" >&2; exit 1; fi; ${pkgs.coreutils}/bin/sleep 1; done'
+          ${pkgs.runtimeShell} -c 'deadline=$((${pkgs.coreutils}/bin/date +%s + ${toString libdogecoinTaWaitTimeoutSeconds})); while [ ! -f /lib/optee_armtz/${libdogecoinTaUuid}.ta ]; do if [ "$(${pkgs.coreutils}/bin/date +%s)" -ge "$deadline" ]; then echo "libdogecoin OP-TEE TA not installed at /lib/optee_armtz/${libdogecoinTaUuid}.ta after ${toString libdogecoinTaWaitTimeoutSeconds}s" >&2; exit 1; fi; ${pkgs.coreutils}/bin/sleep 1; done'
         ''
       ];
       ExecStart = "${dkm}/bin/dkm --dir /opt/dkm";
