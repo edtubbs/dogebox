@@ -115,23 +115,49 @@
     };
   };
 
-  # Setup a Wi-Fi Access Point for initial configuration.
-  # This allows a user to configure the dogebox by only plugging in power
-  # Caveat: Upon configuring the OS with a proper Wi-Fi network, the user will
-  # have to reconnect to that network and manually reload the dpanel page.
-  networking.wireless.iwd.enable = true;
+  # Setup a Wi-Fi Access Point for initial configuration, while simultaneously
+  # using the same Wi-Fi card as a client (STA) for upstream internet access.
+  # This allows the dogebox to host its setup AP and reach the internet over
+  # a single radio (Virtual AP / STA+AP concurrency).
+  #
+  # NetworkManager owns the STA (managed) side; create_ap brings up the AP
+  # virtual interface (ap0) on the same radio and NATs traffic out through
+  # the STA connection.
+  networking.wireless.iwd.enable = false;
+  networking.networkmanager.enable = true;
+  # Keep the AP virtual interface out of NetworkManager so it doesn't fight
+  # create_ap / hostapd over ownership of ap0.
+  networking.networkmanager.unmanaged = [ "interface:ap0" ];
 
   services.create_ap = {
     enable = lib.mkDefault true;
     settings = {
-      INTERNET_IFACE = "lo";
+      # Same physical radio is used for both the AP and the upstream STA;
+      # create_ap will spawn a virtual AP interface and NAT through wlan0.
       WIFI_IFACE = "wlan0";
-      SSID = "Dogebox";
-      PASSPHRASE = "SuchPass";
+      INTERNET_IFACE = "wlan0";
+      SHARE_METHOD = "nat";
+      FREQ_BAND = "2.4";
+      # SSID/PASSPHRASE are sourced from the create_ap service environment
+      # (see systemd.services.create_ap.serviceConfig.EnvironmentFile below)
+      # so they are not baked into the Nix store. The referenced env file is
+      # expected to be provisioned out-of-band before first boot / by setup.
+      SSID = "$AP_SSID";
+      PASSPHRASE = "$AP_PASSPHRASE";
     };
   };
 
-  networking.wireless.interfaces = [ "wlan0" ];
+  # Provide AP_SSID / AP_PASSPHRASE to create_ap via an environment file that
+  # lives outside the Nix store. The file must define:
+  #   AP_SSID=...
+  #   AP_PASSPHRASE=...
+  # It is intentionally not declared in Nix so the credentials can be set
+  # without rebuilding the image.
+  systemd.services.create_ap.serviceConfig.EnvironmentFile = "/etc/dogebox/ap.env";
+
+  # Allow AP clients to obtain an IP (DHCP, port 67) and resolve names
+  # (DNS, port 53) via the dnsmasq instance create_ap brings up.
+  networking.firewall.allowedUDPPorts = [ 53 67 ];
 
   systemd.services.resizerootfs = {
     description = "Expands root filesystem of boot device on first boot";
