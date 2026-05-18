@@ -138,24 +138,49 @@
       INTERNET_IFACE = "wlan0";
       SHARE_METHOD = "nat";
       FREQ_BAND = "2.4";
-      # SSID/PASSPHRASE are sourced from the create_ap service environment
-      # (see systemd.services.create_ap.serviceConfig.EnvironmentFile below)
-      # so they are not baked into the Nix store. The referenced env file is
-      # expected to be provisioned out-of-band before first boot / by setup.
-      SSID = "$AP_SSID";
-      PASSPHRASE = "$AP_PASSPHRASE";
+      # Setup-mode AP identity is intentionally hardcoded: users need a known,
+      # stable SSID/passphrase to reach the dpanel on first boot.
+      SSID = "Dogebox";
+      PASSPHRASE = "SuchPass";
     };
   };
 
-  # Provide AP_SSID / AP_PASSPHRASE to create_ap via an environment file that
-  # lives outside the Nix store. The file must define:
-  #   AP_SSID=...
-  #   AP_PASSPHRASE=...
-  # It is intentionally not declared in Nix so the credentials can be set
-  # without rebuilding the image. The file should be owned by root and have
-  # mode 0600 (e.g. `install -m 0600 -o root -g root ...`) to avoid leaking
-  # the AP passphrase to other local users.
-  systemd.services.create_ap.serviceConfig.EnvironmentFile = "/etc/dogebox/ap.env";
+  # Upstream Wi-Fi (STA) credentials are provided via an environment file that
+  # lives outside the Nix store, so the SSID/PSK the dogebox connects to for
+  # internet access can be set before setup runs without rebuilding the image.
+  # The file must define:
+  #   UPSTREAM_SSID=...
+  #   UPSTREAM_PSK=...
+  # It should be owned by root with mode 0600 to avoid leaking the PSK.
+  # The oneshot service below reads it and pushes the connection into
+  # NetworkManager via nmcli; absence of the file is treated as "no preseeded
+  # upstream" and is not an error (setup can configure it later via dpanel).
+  systemd.services.dogebox-upstream-wifi = {
+    description = "Preseed upstream Wi-Fi (STA) connection into NetworkManager";
+    after = [ "NetworkManager.service" ];
+    requires = [ "NetworkManager.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      EnvironmentFile = "-/etc/dogebox/wifi.env";
+    };
+    path = [ pkgs.networkmanager ];
+    script = ''
+      if [ -z "''${UPSTREAM_SSID:-}" ] || [ -z "''${UPSTREAM_PSK:-}" ]; then
+        echo "dogebox-upstream-wifi: UPSTREAM_SSID / UPSTREAM_PSK not set, skipping."
+        exit 0
+      fi
+      # Idempotent: delete any existing connection with the same name, then add.
+      nmcli -t -f NAME connection show | grep -Fxq "dogebox-upstream" \
+        && nmcli connection delete "dogebox-upstream" || true
+      nmcli connection add type wifi ifname wlan0 con-name "dogebox-upstream" \
+        ssid "$UPSTREAM_SSID" \
+        wifi-sec.key-mgmt wpa-psk \
+        wifi-sec.psk "$UPSTREAM_PSK"
+      nmcli connection up "dogebox-upstream" || true
+    '';
+  };
 
   # Allow AP clients to obtain an IP (DHCP, port 67) and resolve names
   # (DNS, port 53) via the dnsmasq instance create_ap brings up.
