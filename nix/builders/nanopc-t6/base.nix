@@ -116,19 +116,24 @@
   };
 
   # Wi-Fi behaviour is split into two phases driven by which medium the
-  # rootfs was booted from:
+  # rootfs was booted from. The AP (`Dogebox` SSID on the `ap0` vif) comes
+  # up unconditionally on every boot — it is the user's only guaranteed
+  # path to dpanel in both phases — and STA on `wlan0` is layered on top:
   #
   #   * First boot (SD card, installer phase): AP only. The SD→eMMC flow
   #     does not need upstream internet — it just needs the user to reach
-  #     dpanel and trigger the install. STA is suppressed so a missing
-  #     `/etc/dogebox/wifi.env` (which the GUI hasn't written yet) cannot
-  #     hang `network-online.target` and block the AP from coming up.
+  #     dpanel and trigger the install. STA is suppressed via
+  #     `/run/dogebox/sta-disabled` so a missing `/etc/dogebox/wifi.env`
+  #     (which the GUI hasn't written yet) cannot hang
+  #     `wpa_supplicant-wlan0.service` and block the AP from coming up.
   #
-  #   * Second boot (eMMC, runtime phase): STA + AP concurrency. `create_ap`
-  #     runs the `Dogebox` SSID on a dedicated `ap0` virtual interface so it
-  #     does not contend with wpa_supplicant for the radio; wpa_supplicant
-  #     drives upstream STA on `wlan0` once the GUI writes credentials to
-  #     `/etc/dogebox/wifi.env`.
+  #   * Second boot (eMMC, runtime phase): AP comes up immediately so the
+  #     user can connect to `Dogebox` and reach dpanel even before any
+  #     upstream credentials exist. dogeboxd uses `iw dev wlan0 scan` to
+  #     enumerate nearby SSIDs (wlan0 is admin-up via
+  #     `dogebox-ap0-vif.service`), the user picks one, dpanel writes
+  #     `/etc/dogebox/wifi.env`, and `wpa_supplicant-wlan0.service` then
+  #     activates STA on wlan0 — giving STA+AP concurrency with no reboot.
   #
   # The same image is written to eMMC, so the discriminator is runtime, not
   # build-time. NetworkManager / iwd are intentionally NOT used — they
@@ -241,6 +246,14 @@
   # `create_ap` can run AP mode without fighting wpa_supplicant for the
   # underlying interface. Idempotent — `iw` exits non-zero if `ap0` already
   # exists, so we guard with a presence check.
+  #
+  # We also admin-up wlan0 here. The radio is needed admin-up for two
+  # reasons that are independent of wpa_supplicant being active:
+  #   1. On the eMMC boot, the GUI needs to scan for upstream SSIDs via
+  #      `iw dev wlan0 scan` *before* wifi credentials exist, and `iw scan`
+  #      requires the parent interface to be UP.
+  #   2. ap0 is a vif on top of wlan0; some drivers (rtw88 included) are
+  #      happier if the parent is admin-up before AP mode starts on the vif.
   systemd.services.dogebox-ap0-vif = {
     description = "Create AP virtual interface (ap0) on the wlan0 radio";
     wantedBy = [ "create_ap.service" ];
@@ -260,6 +273,7 @@
     ];
     script = ''
       set -eu
+      ip link set wlan0 up
       if ! ip link show ap0 >/dev/null 2>&1; then
         iw dev wlan0 interface add ap0 type __ap
       fi
