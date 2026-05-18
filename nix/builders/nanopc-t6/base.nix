@@ -141,24 +141,35 @@
     };
   };
 
-  # Upstream Wi-Fi (STA) credentials are provided via an environment file that
+  # Upstream Wi-Fi (STA) credentials are provided via a secrets file that
   # lives outside the Nix store, so the SSID/PSK the dogebox connects to for
   # internet access can be set before setup runs without rebuilding the image.
-  # The file must define:
-  #   UPSTREAM_SSID=...
-  #   UPSTREAM_PSK=...
+  #
+  # The file must define (values are interpreted literally — quotes are part
+  # of the value, so the SSID and passphrase must themselves be quoted as
+  # wpa_supplicant expects):
+  #   UPSTREAM_SSID="MyNetworkName"
+  #   UPSTREAM_PSK="mypassphrase"
   # It should be owned by root with mode 0600 to avoid leaking the PSK.
   #
-  # wpa_supplicant performs @VAR@ substitution from this file at start-up, so
-  # the SSID/PSK never end up in the Nix store. wlan0 takes whatever IP the
-  # upstream network's DHCP server hands out (default behaviour for
-  # `networking.wireless` — no static address is configured here).
+  # wpa_supplicant's `ext:` password backend resolves these references at
+  # start-up, so the SSID/PSK never end up in the Nix store. The network is
+  # declared via `extraConfig` (rather than `networking.wireless.networks`)
+  # because the module uses the attribute name as the literal SSID and
+  # provides no way to externalise it — `ext:` substitution only applies to
+  # field values. wlan0 takes whatever IP the upstream network's DHCP server
+  # hands out (default behaviour for `networking.wireless` — no static
+  # address is configured here).
   networking.wireless.enable = true;
   networking.wireless.interfaces = [ "wlan0" ];
-  networking.wireless.environmentFile = "/etc/dogebox/wifi.env";
-  networking.wireless.networks."@UPSTREAM_SSID@" = {
-    psk = "@UPSTREAM_PSK@";
-  };
+  networking.wireless.secretsFile = "/etc/dogebox/wifi.env";
+  networking.wireless.extraConfig = ''
+    network={
+      ssid=ext:UPSTREAM_SSID
+      psk=ext:UPSTREAM_PSK
+      key_mgmt=WPA-PSK
+    }
+  '';
 
   # Allow AP clients to obtain an IP (DHCP, port 67) and resolve names
   # (DNS, port 53) via the dnsmasq instance create_ap brings up.
