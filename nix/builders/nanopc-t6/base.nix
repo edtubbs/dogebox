@@ -228,7 +228,9 @@
       ROOT_PART=$(basename "$(findmnt -c -n -o SOURCE /)")
       ROOT_DISK=$(basename "$(readlink -f "/sys/class/block/$ROOT_PART/..")")
 
-      # rk3588: mmcblk0 = eMMC, mmcblk1 = SD slot.
+      # rk3588: mmcblk0 = eMMC, mmcblk1 = SD slot. ROOT_DISK resolves to
+      # the base device (e.g. `mmcblk0`, not `mmcblk0p1`); the trailing
+      # glob is defensive against kernels that report it differently.
       case "$ROOT_DISK" in
         mmcblk0*)
           echo "runtime" > /run/dogebox/boot-mode
