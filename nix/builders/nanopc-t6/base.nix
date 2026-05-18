@@ -152,7 +152,9 @@
   #   AP_SSID=...
   #   AP_PASSPHRASE=...
   # It is intentionally not declared in Nix so the credentials can be set
-  # without rebuilding the image.
+  # without rebuilding the image. The file should be owned by root and have
+  # mode 0600 (e.g. `install -m 0600 -o root -g root ...`) to avoid leaking
+  # the AP passphrase to other local users.
   systemd.services.create_ap.serviceConfig.EnvironmentFile = "/etc/dogebox/ap.env";
 
   # Allow AP clients to obtain an IP (DHCP, port 67) and resolve names
