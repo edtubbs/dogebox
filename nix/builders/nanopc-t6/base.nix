@@ -135,6 +135,13 @@
     };
   };
 
+  # Trust the AP vif so clients connecting to the `Dogebox` SSID can reach
+  # the dnsmasq instance `create_ap` runs (DHCP on UDP/67, DNS on UDP/53)
+  # and dpanel/dogeboxd. Without this, the global firewall drops the DHCP
+  # offer, clients fail to obtain a lease, and most phones then mark the
+  # network as failed and stop showing it.
+  networking.firewall.trustedInterfaces = [ "ap0" ];
+
   # Create the `ap0` vif on the wlan0 radio before `create_ap` starts.
   systemd.services.dogebox-ap0-vif = {
     description = "Create AP virtual interface (ap0) on the wlan0 radio";
