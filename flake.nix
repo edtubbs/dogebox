@@ -187,7 +187,9 @@ rec {
 
         # These are the built packages, rather than the raw sources.
         dkm = inputs.dkm.packages.${system}.default;
-        dogeboxd = inputs.dogeboxd.packages.${system}.default;
+        dogeboxd = inputs.dogeboxd.packages.${system}.default.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [ ./nix/dbx/patches/dogeboxd-wifi-test-connect.patch ];
+        });
         dpanel = inputs.dpanel.packages.${system}.default;
 
         # Explicitly only pass the rk3588 firmware for the nanopc-t6 builder.
