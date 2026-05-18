@@ -115,31 +115,27 @@
     };
   };
 
-  # Setup a Wi-Fi Access Point for initial configuration, while simultaneously
-  # using the same Wi-Fi card as a client (STA) for upstream internet access.
-  # This allows the dogebox to host its setup AP and reach the internet over
-  # a single radio (Virtual AP / STA+AP concurrency).
+  # Setup a Wi-Fi Access Point for initial configuration, while attempting to
+  # also use the same Wi-Fi card as a client (STA) for upstream internet
+  # access (Virtual AP / STA+AP concurrency).
   #
-  # NetworkManager owns the STA (managed) side; create_ap brings up the AP
-  # virtual interface (ap0) on the same radio and NATs traffic out through
-  # the STA connection.
+  # wpa_supplicant owns the STA (managed) side on wlan0; create_ap brings up
+  # an AP virtual interface (ap0) on the same radio and NATs traffic out
+  # through wlan0. NetworkManager is intentionally NOT used here — on this
+  # rtw88 radio it conflicts with create_ap and prevents the AP from coming
+  # up during initial install.
   networking.wireless.iwd.enable = false;
-  networking.networkmanager.enable = true;
-  # Keep the AP virtual interface out of NetworkManager so it doesn't fight
-  # create_ap / hostapd over ownership of ap0.
-  networking.networkmanager.unmanaged = [ "interface:ap0" ];
+  networking.networkmanager.enable = false;
 
+  # AP for initial setup — SSID/passphrase are intentionally hardcoded so the
+  # user has a known, stable network to reach the dpanel on first boot.
   services.create_ap = {
     enable = lib.mkDefault true;
     settings = {
-      # Same physical radio is used for both the AP and the upstream STA;
-      # create_ap will spawn a virtual AP interface and NAT through wlan0.
       WIFI_IFACE = "wlan0";
       INTERNET_IFACE = "wlan0";
       SHARE_METHOD = "nat";
       FREQ_BAND = "2.4";
-      # Setup-mode AP identity is intentionally hardcoded: users need a known,
-      # stable SSID/passphrase to reach the dpanel on first boot.
       SSID = "Dogebox";
       PASSPHRASE = "SuchPass";
     };
@@ -152,34 +148,16 @@
   #   UPSTREAM_SSID=...
   #   UPSTREAM_PSK=...
   # It should be owned by root with mode 0600 to avoid leaking the PSK.
-  # The oneshot service below reads it and pushes the connection into
-  # NetworkManager via nmcli; absence of the file is treated as "no preseeded
-  # upstream" and is not an error (setup can configure it later via dpanel).
-  systemd.services.dogebox-upstream-wifi = {
-    description = "Preseed upstream Wi-Fi (STA) connection into NetworkManager";
-    after = [ "NetworkManager.service" ];
-    requires = [ "NetworkManager.service" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      EnvironmentFile = "-/etc/dogebox/wifi.env";
-    };
-    path = [ pkgs.networkmanager ];
-    script = ''
-      if [ -z "''${UPSTREAM_SSID:-}" ] || [ -z "''${UPSTREAM_PSK:-}" ]; then
-        echo "dogebox-upstream-wifi: UPSTREAM_SSID / UPSTREAM_PSK not set, skipping."
-        exit 0
-      fi
-      # Idempotent: delete any existing connection with the same name, then add.
-      nmcli -t -f NAME connection show | grep -Fxq "dogebox-upstream" \
-        && nmcli connection delete "dogebox-upstream" || true
-      nmcli connection add type wifi ifname wlan0 con-name "dogebox-upstream" \
-        ssid "$UPSTREAM_SSID" \
-        wifi-sec.key-mgmt wpa-psk \
-        wifi-sec.psk "$UPSTREAM_PSK"
-      nmcli connection up "dogebox-upstream" || true
-    '';
+  #
+  # wpa_supplicant performs @VAR@ substitution from this file at start-up, so
+  # the SSID/PSK never end up in the Nix store. wlan0 takes whatever IP the
+  # upstream network's DHCP server hands out (default behaviour for
+  # `networking.wireless` — no static address is configured here).
+  networking.wireless.enable = true;
+  networking.wireless.interfaces = [ "wlan0" ];
+  networking.wireless.environmentFile = "/etc/dogebox/wifi.env";
+  networking.wireless.networks."@UPSTREAM_SSID@" = {
+    psk = "@UPSTREAM_PSK@";
   };
 
   # Allow AP clients to obtain an IP (DHCP, port 67) and resolve names
