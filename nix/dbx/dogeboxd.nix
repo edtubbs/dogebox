@@ -50,11 +50,8 @@
 
   systemd.services.dogeboxd = {
     enable = !devMode;
-    # Intentionally not gated on `systemd-networkd-wait-online.service`:
-    # on the SD installer boot there is no upstream STA (by design — see
-    # `nix/builders/nanopc-t6/base.nix`), so network-online never fires.
-    # dogeboxd is the service the user talks to over the `Dogebox` AP to
-    # configure STA, so it must be reachable *before* upstream is online.
+    # dogeboxd is reached over the AP to configure upstream Wi-Fi, so it
+    # must start before upstream is online (don't wait for network-online).
     after = [ "network.target" ];
     wants = [ "network.target" ];
     wantedBy = [ "multi-user.target" ];
