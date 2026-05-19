@@ -145,6 +145,14 @@
       FREQ_BAND = "2.4";
       SSID = "Dogebox";
       PASSPHRASE = "SuchPass";
+      # Bind to the existing `ap0` vif we created on the wlan0 radio rather
+      # than letting create_ap spawn its own `apN` virtual interface. Without
+      # this, create_ap detects that wlan0 is being used as INTERNET_IFACE
+      # on the same radio and creates `ap1`, leaving our `ap0` (which
+      # `firewall.trustedInterfaces` and dogeboxd's network reporting key
+      # off) with no IP. Result: clients associate to `ap1` but DHCP/DNS
+      # traffic is dropped because only `ap0` is trusted.
+      NO_VIRT = "1";
     };
   };
 
