@@ -119,40 +119,36 @@
   # is handled by dogeboxd at runtime; this image only needs to bring the
   # AP up so the user can reach dpanel.
   #
-  # AP runs on a dedicated `ap0` vif (created below) so `wlan0` stays free
-  # for concurrent STA. iwd is disabled — it conflicts with `create_ap` on
-  # this rtw88 radio. `FREQ_BAND = "2.4"` is required for AP+STA concurrency.
+  # `iwd` is disabled — it conflicts with `create_ap` on this rtw88 radio.
+  # `FREQ_BAND = "2.4"` is required for AP+STA concurrency on the same radio.
   networking.wireless.iwd.enable = false;
 
   # Pin the rtw88 radio to the legacy name `wlan0`. Without this, systemd's
   # predictable interface naming renames it to something like `wlP3p49s0`,
-  # which breaks `dogebox-ap0-vif.service` (`ip link set wlan0 up` fails
-  # with `Cannot find device "wlan0"`) and the entire AP/STA flow that
-  # references `wlan0` by name (`INTERNET_IFACE`, the `sys-subsystem-net-
-  # devices-wlan0.device` dependency, dogeboxd STA management).
+  # which breaks the AP/STA flow that references `wlan0` by name
+  # (`INTERNET_IFACE`, dogeboxd STA management, etc.).
   # `.link` files are processed by udev in early boot, before any service
-  # that waits on the wlan0 device unit is started.
+  # that depends on the wlan0 device unit is started.
   systemd.network.links."10-wlan0" = {
     matchConfig.Driver = "rtw88_8822ce";
     linkConfig.Name = "wlan0";
   };
 
+  # `create_ap` manages its own AP virtual interface. With WIFI_IFACE and
+  # INTERNET_IFACE both pointing at the same radio (`wlan0`), it detects the
+  # need for AP+STA concurrency and spawns a vif named `ap0` (the first free
+  # `apN`) for the AP, leaving `wlan0` available for the STA that dogeboxd
+  # configures at runtime. We don't pre-create the vif ourselves — doing so
+  # forces `create_ap` to pick `ap1` instead, and using `NO_VIRT=1` to
+  # override that prevents the service from starting at all on this radio.
   services.create_ap = {
     enable = lib.mkDefault true;
     settings = {
-      WIFI_IFACE = "ap0";
+      WIFI_IFACE = "wlan0";
       INTERNET_IFACE = "wlan0";
       FREQ_BAND = "2.4";
       SSID = "Dogebox";
       PASSPHRASE = "SuchPass";
-      # Bind to the existing `ap0` vif we created on the wlan0 radio rather
-      # than letting create_ap spawn its own `apN` virtual interface. Without
-      # this, create_ap detects that wlan0 is being used as INTERNET_IFACE
-      # on the same radio and creates `ap1`, leaving our `ap0` (which
-      # `firewall.trustedInterfaces` and dogeboxd's network reporting key
-      # off) with no IP. Result: clients associate to `ap1` but DHCP/DNS
-      # traffic is dropped because only `ap0` is trusted.
-      NO_VIRT = "1";
     };
   };
 
@@ -160,29 +156,9 @@
   # the dnsmasq instance `create_ap` runs (DHCP on UDP/67, DNS on UDP/53)
   # and dpanel/dogeboxd. Without this, the global firewall drops the DHCP
   # offer, clients fail to obtain a lease, and most phones then mark the
-  # network as failed and stop showing it.
+  # network as failed and stop showing it. `create_ap` names its auto-
+  # created vif `ap0` when none exists yet.
   networking.firewall.trustedInterfaces = [ "ap0" ];
-
-  # Create the `ap0` vif on the wlan0 radio before `create_ap` starts.
-  systemd.services.dogebox-ap0-vif = {
-    description = "Create AP virtual interface (ap0) on the wlan0 radio";
-    wantedBy = [ "create_ap.service" ];
-    before = [ "create_ap.service" ];
-    after = [ "sys-subsystem-net-devices-wlan0.device" ];
-    wants = [ "sys-subsystem-net-devices-wlan0.device" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-    };
-    path = with pkgs; [ iw iproute2 ];
-    script = ''
-      set -eu
-      ip link set wlan0 up
-      if ! ip link show ap0 >/dev/null 2>&1; then
-        iw dev wlan0 interface add ap0 type __ap
-      fi
-    '';
-  };
 
   systemd.services.resizerootfs = {
     description = "Expands root filesystem of boot device on first boot";
