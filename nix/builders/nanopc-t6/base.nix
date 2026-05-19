@@ -124,6 +124,19 @@
   # this rtw88 radio. `FREQ_BAND = "2.4"` is required for AP+STA concurrency.
   networking.wireless.iwd.enable = false;
 
+  # Pin the rtw88 radio to the legacy name `wlan0`. Without this, systemd's
+  # predictable interface naming renames it to something like `wlP3p49s0`,
+  # which breaks `dogebox-ap0-vif.service` (`ip link set wlan0 up` fails
+  # with `Cannot find device "wlan0"`) and the entire AP/STA flow that
+  # references `wlan0` by name (`INTERNET_IFACE`, the `sys-subsystem-net-
+  # devices-wlan0.device` dependency, dogeboxd STA management).
+  # `.link` files are processed by udev in early boot, before any service
+  # that waits on the wlan0 device unit is started.
+  systemd.network.links."10-wlan0" = {
+    matchConfig.Driver = "rtw88_8822ce";
+    linkConfig.Name = "wlan0";
+  };
+
   services.create_ap = {
     enable = lib.mkDefault true;
     settings = {
