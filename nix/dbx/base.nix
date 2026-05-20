@@ -1,5 +1,9 @@
 { lib, pkgs, ... }:
 
+let
+  # Used as `tarball-ttl` below — see comment on that setting.
+  oneYearInSeconds = 365 * 24 * 60 * 60;
+in
 {
   imports = [
     ./dogebox.nix
@@ -46,7 +50,7 @@
     #     already pins narHashes; the default 1 h TTL is what triggers
     #     the DNS lookup that kills the rebuild.
     fallback = true;
-    tarball-ttl = 31536000;
+    tarball-ttl = oneYearInSeconds;
 
     system-features = [
       "nixos-test"
