@@ -121,7 +121,10 @@
   #
   # `iwd` is disabled — it conflicts with `create_ap` on this rtw88 radio.
   # `FREQ_BAND = "2.4"` is required for AP+STA concurrency on the same radio.
-  networking.wireless.iwd.enable = false;
+  # mkForce: dogeboxd writes `networking.wireless.iwd.enable = true` into
+  # `/opt/dogebox/nix/network.nix` when an STA config is saved, which would
+  # otherwise conflict with this and abort the rebuild.
+  networking.wireless.iwd.enable = lib.mkForce false;
 
   # Pin the rtw88 radio to the legacy name `wlan0`. Without this, systemd's
   # predictable interface naming renames it to something like `wlP3p49s0`,
