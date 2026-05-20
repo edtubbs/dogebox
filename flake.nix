@@ -21,7 +21,7 @@ rec {
     };
 
     dogeboxd = {
-      url = "github:dogebox-wg/dogeboxd";
+      url = "github:edtubbs/dogeboxd/copilot/fix-dogeboxd-lock-file-issue";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
       inputs.dpanel.follows = "dpanel";

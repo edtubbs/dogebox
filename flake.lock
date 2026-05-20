@@ -56,15 +56,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1778817395,
-        "narHash": "sha256-U8/jG3pYogs/y3t5biI0VHeM6/s5T8dgIt9Y/xkpWss=",
-        "owner": "dogebox-wg",
+        "lastModified": 1779302902,
+        "narHash": "sha256-DABwYumpFDwHXkCmna28v/Rg3cMvtBW2cItRs7QiZPA=",
+        "owner": "edtubbs",
         "repo": "dogeboxd",
-        "rev": "fc0d85f70a204725bc18fb72ec0859cb98a791b2",
+        "rev": "10acb437d8011578f2db3908ed9ed85ef96f6c74",
         "type": "github"
       },
       "original": {
-        "owner": "dogebox-wg",
+        "owner": "edtubbs",
+        "ref": "copilot/fix-dogeboxd-lock-file-issue",
         "repo": "dogeboxd",
         "type": "github"
       }
