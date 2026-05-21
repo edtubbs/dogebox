@@ -119,9 +119,12 @@
   # is handled by dogeboxd at runtime; this image only needs to bring the
   # AP up so the user can reach dpanel.
   #
-  # `iwd` is disabled — it conflicts with `create_ap` on this rtw88 radio.
+  # `iwd` is disabled here — it conflicts with `create_ap` on this rtw88
+  # radio. `mkDefault` so dogeboxd's STA `network.nix` (which sets
+  # `iwd.enable = true;` and force-disables `create_ap`) cleanly overrides
+  # at normal priority without a `conflicting definition values` abort.
   # `FREQ_BAND = "2.4"` is required for AP+STA concurrency on the same radio.
-  networking.wireless.iwd.enable = false;
+  networking.wireless.iwd.enable = lib.mkDefault false;
 
   # Pin the rtw88 radio to the legacy name `wlan0`. Without this, systemd's
   # predictable interface naming renames it to something like `wlP3p49s0`,
