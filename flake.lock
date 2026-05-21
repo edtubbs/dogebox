@@ -56,11 +56,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779302902,
-        "narHash": "sha256-DABwYumpFDwHXkCmna28v/Rg3cMvtBW2cItRs7QiZPA=",
+        "lastModified": 1779319550,
+        "narHash": "sha256-/gCuByIPxR8otVesfzdufPGTyps8dXSSnMPVteQPyx8=",
         "owner": "edtubbs",
         "repo": "dogeboxd",
-        "rev": "10acb437d8011578f2db3908ed9ed85ef96f6c74",
+        "rev": "6bffe1c374ffeab77ccd77b6dcc56b4f432c1cb1",
         "type": "github"
       },
       "original": {
